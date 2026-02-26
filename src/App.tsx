@@ -514,7 +514,7 @@ export default function App() {
                 </div>
               </div>
 
-              <header className="bg-white p-3 md:p-6 rounded-[26px] md:rounded-[35px] shadow-md border-b-4 border-green-200 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center shrink-0">
+              <header className="bg-white p-3 md:p-6 rounded-[26px] md:rounded-[35px] shadow-md border-b-4 border-green-200 flex items-center justify-between gap-3 shrink-0">
                 <div className="flex items-center gap-3 md:gap-4 min-w-0">
                   <div className="bg-blue-100 p-2 md:p-3 rounded-2xl text-blue-600 shrink-0">
                     <Search size={24} />
@@ -526,14 +526,14 @@ export default function App() {
                 </div>
                 <button 
                   onClick={() => handleSpeak(currentMission.audioText)}
-                  className={`p-2 md:p-4 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+                  className={`p-2 md:p-4 rounded-full shadow-lg transition-all shrink-0 ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
                   title="Play Audio"
                 >
                   {isSpeaking ? <VolumeX size={20} /> : <Volume2 size={20} />}
                 </button>
               </header>
 
-              <div className="flex-[3] grid grid-cols-2 gap-2 md:gap-4 min-h-0">
+              <div className="flex-[2.7] md:flex-[3] grid grid-cols-2 gap-2 md:gap-4 min-h-0">
                 <div id="zone-left" className={`drop-zone bg-blue-50 border-blue-200 shadow-inner flex flex-col min-h-0 ${allSorted ? 'opacity-50' : ''}`}>
                   <div className="flex items-center gap-2 md:gap-3 p-2 md:p-4 shrink-0">
                     <span className="text-3xl md:text-4xl drop-shadow-sm">{currentMission.leftIcon}</span>
@@ -603,7 +603,7 @@ export default function App() {
                 )}
               </AnimatePresence>
 
-              <div className="flex-1 bg-white p-2 md:p-4 rounded-[24px] md:rounded-[35px] shadow-inner border-2 border-slate-100 flex justify-center items-center shrink-0 relative z-10 min-h-0">
+              <div className="flex-[1.25] md:flex-1 bg-white p-2 md:p-4 rounded-[24px] md:rounded-[35px] shadow-inner border-2 border-slate-100 flex justify-center items-center shrink-0 relative z-10 min-h-[11.5rem] md:min-h-0">
                 {!allSorted ? (
                   <div
                     className={`w-full justify-items-center content-center gap-2 md:gap-4 ${
