@@ -389,6 +389,8 @@ export default function App() {
     }
   };
 
+  const unsortedItems = currentMission.items.filter(item => !sortedItems[item.id]);
+
   const backToStart = () => {
     stopAllAudio();
     setGameState('start');
@@ -436,7 +438,7 @@ export default function App() {
             title="Skip to Field Guide"
           >
             <BookOpen size={16} />
-            <span className="hidden sm:inline">Field Guide</span>
+            <span>Field Guide</span>
           </button>
         )}
         {gameState === 'celebration' && (
@@ -446,7 +448,7 @@ export default function App() {
             title="Back to Start"
           >
             <RotateCcw size={16} />
-            <span className="hidden sm:inline">Start</span>
+            <span>Start</span>
           </button>
         )}
       </div>
@@ -502,19 +504,12 @@ export default function App() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleSpeak(currentMission.audioText)}
-                    className={`p-2 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
-                    title="Play Audio"
-                  >
-                    {isSpeaking ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                  </button>
-                  <button
                     onClick={skipToFieldGuide}
                     className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 text-slate-400 hover:text-blue-500 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
                     title="Skip to Field Guide"
                   >
                     <BookOpen size={16} />
-                    <span className="hidden sm:inline">Field Guide</span>
+                    <span>Field Guide</span>
                   </button>
                 </div>
               </div>
@@ -529,6 +524,13 @@ export default function App() {
                     <p className="text-blue-400 font-bold text-[10px] uppercase tracking-widest mt-1">Digital Training Phase</p>
                   </div>
                 </div>
+                <button 
+                  onClick={() => handleSpeak(currentMission.audioText)}
+                  className={`p-2 md:p-4 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+                  title="Play Audio"
+                >
+                  {isSpeaking ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                </button>
               </header>
 
               <div className="flex-[3] grid grid-cols-2 gap-2 md:gap-4 min-h-0">
@@ -603,10 +605,12 @@ export default function App() {
 
               <div className="flex-1 bg-white p-2 md:p-4 rounded-[24px] md:rounded-[35px] shadow-inner border-2 border-slate-100 flex justify-center items-center shrink-0 relative z-10 min-h-0">
                 {!allSorted ? (
-                  <div className="flex flex-wrap justify-center gap-2 md:gap-4 w-full">
-                    {currentMission.items
-                      .filter(item => !sortedItems[item.id])
-                      .map(item => (
+                  <div
+                    className={`w-full justify-items-center content-center gap-2 md:gap-4 ${
+                      currentMission.items.length === 4 ? 'grid grid-cols-2' : 'grid grid-cols-3'
+                    } md:flex md:flex-nowrap md:justify-center`}
+                  >
+                    {unsortedItems.map(item => (
                         <motion.div
                           id={`item-${item.id}`}
                           key={item.id}
@@ -622,7 +626,7 @@ export default function App() {
                             if (leftZone && x >= leftZone.left && x <= leftZone.right) handleDrop(item.id, 'left');
                             else if (rightZone && x >= rightZone.left && x <= rightZone.right) handleDrop(item.id, 'right');
                           }}
-                          className="text-4xl md:text-6xl w-14 h-14 md:w-24 md:h-24 flex items-center justify-center bg-white rounded-2xl shadow-lg border-2 border-slate-50 cursor-grab shrink-0 touch-none select-none"
+                          className="text-5xl md:text-6xl w-16 h-16 md:w-24 md:h-24 flex items-center justify-center bg-white rounded-2xl shadow-lg border-2 border-slate-50 cursor-grab shrink-0 touch-none select-none"
                         >
                           {item.emoji}
                         </motion.div>
@@ -655,7 +659,7 @@ export default function App() {
                 title="Back to Start"
               >
                 <RotateCcw size={16} />
-                <span className="hidden sm:inline">Start</span>
+                <span>Start</span>
               </button>
             </div>
             <div className="field-guide-shell bg-white p-2 sm:p-3 md:p-4 rounded-[28px] md:rounded-[40px] shadow-lg border-2 border-slate-100 flex flex-col flex-grow overflow-hidden gap-2 md:gap-3 border-t-8 border-t-yellow-400 h-full min-h-0">
@@ -673,9 +677,9 @@ export default function App() {
                 </div>
                 <button 
                   onClick={() => handleSpeak(currentFieldMission.audioText)}
-                  className={`field-guide-audio p-2 md:p-3 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+                  className={`field-guide-audio p-2 md:p-4 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
                 >
-                  {isSpeaking ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                  {isSpeaking ? <VolumeX size={22} /> : <Volume2 size={22} />}
                 </button>
               </header>
 
