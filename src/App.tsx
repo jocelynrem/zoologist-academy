@@ -464,7 +464,7 @@ export default function App() {
           >
             <div className="relative">
               <div className="text-[7rem] md:text-[10rem] animate-bounce-gentle leading-none">🦁</div>
-              <div className="absolute -top-3 -right-3 md:-top-4 md:-right-4 text-4xl md:text-5xl">🎓</div>
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 md:-top-5 text-4xl md:text-5xl">🎓</div>
             </div>
             <div className="space-y-2">
               <h1 className="text-5xl md:text-7xl font-black text-green-600 tracking-tight">Zoologist Academy</h1>
