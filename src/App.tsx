@@ -389,6 +389,14 @@ export default function App() {
     }
   };
 
+  const backToStart = () => {
+    stopAllAudio();
+    setGameState('start');
+    setCurrentMissionIdx(0);
+    setCurrentFieldIdx(0);
+    setSortedItems({});
+  };
+
   useEffect(() => {
     if (gameState === 'start' || gameState === 'celebration') {
       lastAutoPlayKeyRef.current = null;
@@ -431,15 +439,9 @@ export default function App() {
             <span className="hidden sm:inline">Field Guide</span>
           </button>
         )}
-        {(gameState === 'field-guide' || gameState === 'celebration') && (
+        {gameState === 'celebration' && (
           <button 
-            onClick={() => {
-              stopAllAudio();
-              setGameState('start');
-              setCurrentMissionIdx(0);
-              setCurrentFieldIdx(0);
-              setSortedItems({});
-            }}
+            onClick={backToStart}
             className="bg-white/80 backdrop-blur-sm p-2 rounded-xl shadow-sm border border-slate-200 text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
             title="Back to Start"
           >
@@ -498,14 +500,23 @@ export default function App() {
                 <div className="bg-white px-3 md:px-4 py-1 rounded-full shadow-sm border border-slate-100 font-black text-xs text-slate-400 flex items-center gap-2">
                   Level: <span className="text-green-600">{currentMissionIdx + 1}</span> / {MISSIONS.length}
                 </div>
-                <button
-                  onClick={skipToFieldGuide}
-                  className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 text-slate-400 hover:text-blue-500 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
-                  title="Skip to Field Guide"
-                >
-                  <BookOpen size={16} />
-                  <span className="hidden sm:inline">Field Guide</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleSpeak(currentMission.audioText)}
+                    className={`p-2 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+                    title="Play Audio"
+                  >
+                    {isSpeaking ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                  </button>
+                  <button
+                    onClick={skipToFieldGuide}
+                    className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 text-slate-400 hover:text-blue-500 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
+                    title="Skip to Field Guide"
+                  >
+                    <BookOpen size={16} />
+                    <span className="hidden sm:inline">Field Guide</span>
+                  </button>
+                </div>
               </div>
 
               <header className="bg-white p-3 md:p-6 rounded-[26px] md:rounded-[35px] shadow-md border-b-4 border-green-200 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center shrink-0">
@@ -517,14 +528,6 @@ export default function App() {
                     <h2 className="text-lg md:text-4xl font-black text-slate-800 leading-tight uppercase tracking-tight break-words">{currentMission.instruction}</h2>
                     <p className="text-blue-400 font-bold text-[10px] uppercase tracking-widest mt-1">Digital Training Phase</p>
                   </div>
-                </div>
-                <div className="flex items-center gap-4 self-end sm:self-auto">
-                  <button 
-                    onClick={() => handleSpeak(currentMission.audioText)}
-                    className={`p-3 md:p-4 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
-                  >
-                    {isSpeaking ? <VolumeX size={24} /> : <Volume2 size={24} />}
-                  </button>
                 </div>
               </header>
 
@@ -645,6 +648,16 @@ export default function App() {
             exit={{ opacity: 0, y: -100 }}
             className="flex-grow flex flex-col gap-3 md:gap-4 h-full min-h-0"
           >
+            <div className="flex justify-end shrink-0">
+              <button 
+                onClick={backToStart}
+                className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
+                title="Back to Start"
+              >
+                <RotateCcw size={16} />
+                <span className="hidden sm:inline">Start</span>
+              </button>
+            </div>
             <div className="field-guide-shell bg-white p-2 sm:p-3 md:p-4 rounded-[28px] md:rounded-[40px] shadow-lg border-2 border-slate-100 flex flex-col flex-grow overflow-hidden gap-2 md:gap-3 border-t-8 border-t-yellow-400 h-full min-h-0">
               <header className="field-guide-header grid grid-cols-[auto_1fr_auto] items-center gap-2 md:gap-4 shrink-0">
                 <div className="field-guide-icon p-2 md:p-3 bg-yellow-50 rounded-3xl text-yellow-600">
