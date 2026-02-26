@@ -421,7 +421,7 @@ export default function App() {
     >
       {/* Global Navigation Overlays */}
       <div className="absolute top-4 right-4 z-50 flex gap-2 no-print">
-        {(gameState === 'start' || gameState === 'sorting') && (
+        {gameState === 'start' && (
           <button 
             onClick={skipToFieldGuide}
             className="bg-white/80 backdrop-blur-sm p-2 rounded-xl shadow-sm border border-slate-200 text-slate-400 hover:text-blue-500 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
@@ -449,11 +449,6 @@ export default function App() {
             <RotateCcw size={16} />
             <span className="hidden sm:inline">Start</span>
           </button>
-        )}
-        {gameState === 'sorting' && (
-          <div className="bg-white px-4 py-1 rounded-full shadow-sm border border-slate-100 font-black text-xs text-slate-400 flex items-center gap-2">
-            Level: <span className="text-green-600">{currentMissionIdx + 1}</span> / {MISSIONS.length}
-          </div>
         )}
       </div>
 
@@ -502,17 +497,31 @@ export default function App() {
             className="sorting-screen flex-grow flex flex-col gap-3 md:gap-4 h-full min-h-0"
           >
             <div className="flex flex-col gap-4 h-full min-h-0 overflow-hidden">
-              <header className="bg-white p-3 md:p-6 rounded-[26px] md:rounded-[35px] shadow-md border-b-4 border-green-200 flex justify-between items-center shrink-0">
+              <div className="flex items-center justify-between gap-2 shrink-0">
+                <div className="bg-white px-3 md:px-4 py-1 rounded-full shadow-sm border border-slate-100 font-black text-xs text-slate-400 flex items-center gap-2">
+                  Level: <span className="text-green-600">{currentMissionIdx + 1}</span> / {MISSIONS.length}
+                </div>
+                <button
+                  onClick={skipToFieldGuide}
+                  className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 text-slate-400 hover:text-blue-500 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
+                  title="Skip to Field Guide"
+                >
+                  <BookOpen size={16} />
+                  <span className="hidden sm:inline">Field Guide</span>
+                </button>
+              </div>
+
+              <header className="bg-white p-3 md:p-6 rounded-[26px] md:rounded-[35px] shadow-md border-b-4 border-green-200 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center shrink-0">
                 <div className="flex items-center gap-3 md:gap-4 min-w-0">
                   <div className="bg-blue-100 p-2 md:p-3 rounded-2xl text-blue-600 shrink-0">
                     <Search size={24} />
                   </div>
                   <div className="text-left min-w-0">
-                    <h2 className="text-xl md:text-4xl font-black text-slate-800 leading-none uppercase tracking-tight truncate">{currentMission.instruction}</h2>
+                    <h2 className="text-lg md:text-4xl font-black text-slate-800 leading-tight uppercase tracking-tight break-words">{currentMission.instruction}</h2>
                     <p className="text-blue-400 font-bold text-[10px] uppercase tracking-widest mt-1">Digital Training Phase</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 self-end sm:self-auto">
                   <button 
                     onClick={() => handleSpeak(currentMission.audioText)}
                     className={`p-3 md:p-4 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
