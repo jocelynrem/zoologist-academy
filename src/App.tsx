@@ -270,7 +270,9 @@ export default function App() {
   const [fieldDrawings, setFieldDrawings] = useState<{ [missionId: number]: string }>({});
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
+  const [showWrongDropCue, setShowWrongDropCue] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const wrongDropTimerRef = useRef<number | null>(null);
 
   const currentMission = MISSIONS[currentMissionIdx];
   const currentFieldMission = shuffledFieldMissions[currentFieldIdx];
@@ -316,6 +318,14 @@ export default function App() {
     if (item && item.category === category) {
       setSortedItems(prev => ({ ...prev, [itemId]: category }));
     } else {
+      if (wrongDropTimerRef.current) {
+        window.clearTimeout(wrongDropTimerRef.current);
+      }
+      setShowWrongDropCue(true);
+      wrongDropTimerRef.current = window.setTimeout(() => {
+        setShowWrongDropCue(false);
+      }, 1700);
+
       const el = document.getElementById(`item-${itemId}`);
       if (el) {
         el.animate([
@@ -328,6 +338,14 @@ export default function App() {
       }
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (wrongDropTimerRef.current) {
+        window.clearTimeout(wrongDropTimerRef.current);
+      }
+    };
+  }, []);
 
   const allSorted = currentMission.items.every(item => sortedItems[item.id]);
 
@@ -480,7 +498,7 @@ export default function App() {
               <div className="flex-[3] grid grid-cols-2 gap-4 min-h-0">
                 <div id="zone-left" className={`drop-zone bg-blue-50 border-blue-200 shadow-inner flex flex-col min-h-0 ${allSorted ? 'opacity-50' : ''}`}>
                   <div className="flex items-center gap-3 p-4 shrink-0">
-                    <span className="text-4xl drop-shadow-sm">{currentMission.items[0].category === 'left' ? MISSIONS[currentMissionIdx].items.find(i => i.category === 'left')?.emoji : '❤️'}</span>
+                    <span className="text-4xl drop-shadow-sm">{currentMission.leftIcon}</span>
                     <span className="text-xl font-black text-blue-700 uppercase leading-none">{currentMission.leftLabel}</span>
                   </div>
                   <div className="flex-grow overflow-y-auto p-4">
@@ -503,7 +521,7 @@ export default function App() {
 
                 <div id="zone-right" className={`drop-zone bg-orange-50 border-orange-200 shadow-inner flex flex-col min-h-0 ${allSorted ? 'opacity-50' : ''}`}>
                   <div className="flex items-center gap-3 p-4 shrink-0">
-                    <span className="text-4xl drop-shadow-sm">{currentMission.items.find(i => i.category === 'right')?.emoji || '🧱'}</span>
+                    <span className="text-4xl drop-shadow-sm">{currentMission.rightIcon}</span>
                     <span className="text-xl font-black text-orange-700 uppercase leading-none">{currentMission.rightLabel}</span>
                   </div>
                   <div className="flex-grow overflow-y-auto p-4">
@@ -524,6 +542,28 @@ export default function App() {
                   </div>
                 </div>
               </div>
+
+              <AnimatePresence>
+                {showWrongDropCue && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                    className="mx-auto w-full max-w-md rounded-3xl border-b-4 border-red-200 bg-red-50 px-6 py-3 shadow-md shrink-0"
+                  >
+                    <div className="flex items-center justify-center text-5xl md:text-6xl">
+                      <motion.span
+                        initial={{ scale: 0.9 }}
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 0.4 }}
+                        className="drop-shadow-sm text-red-500"
+                      >
+                        🤔
+                      </motion.span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div className="flex-1 bg-white p-4 rounded-[35px] shadow-inner border-2 border-slate-100 flex justify-center items-center shrink-0 relative z-10">
                 {!allSorted ? (
