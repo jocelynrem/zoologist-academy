@@ -273,6 +273,7 @@ export default function App() {
   const [showWrongDropCue, setShowWrongDropCue] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const wrongDropTimerRef = useRef<number | null>(null);
+  const lastAutoPlayKeyRef = useRef<string | null>(null);
 
   const currentMission = MISSIONS[currentMissionIdx];
   const currentFieldMission = shuffledFieldMissions[currentFieldIdx];
@@ -388,7 +389,27 @@ export default function App() {
     }
   };
 
-  // Removed auto-start audio useEffect per user request
+  useEffect(() => {
+    if (gameState === 'start' || gameState === 'celebration') {
+      lastAutoPlayKeyRef.current = null;
+      return;
+    }
+
+    if (gameState === 'sorting') {
+      const key = `sorting-${currentMissionIdx}`;
+      if (lastAutoPlayKeyRef.current === key) return;
+      lastAutoPlayKeyRef.current = key;
+      handleSpeak(currentMission.audioText);
+      return;
+    }
+
+    if (gameState === 'field-guide' && currentFieldMission) {
+      const key = `field-${currentFieldMission.id}-${currentFieldIdx}`;
+      if (lastAutoPlayKeyRef.current === key) return;
+      lastAutoPlayKeyRef.current = key;
+      handleSpeak(currentFieldMission.audioText);
+    }
+  }, [gameState, currentMissionIdx, currentFieldIdx, currentMission.audioText, currentFieldMission]);
 
   return (
     <div className="h-screen w-full flex flex-col p-4 md:p-6 max-w-6xl mx-auto bg-slate-50 relative overflow-y-auto">
