@@ -412,7 +412,13 @@ export default function App() {
   }, [gameState, currentMissionIdx, currentFieldIdx, currentMission.audioText, currentFieldMission]);
 
   return (
-    <div className="app-shell min-h-[100dvh] w-full flex flex-col p-3 md:p-6 max-w-6xl mx-auto bg-slate-50 relative overflow-y-auto">
+    <div
+      className={`app-shell w-full flex flex-col p-3 md:p-6 max-w-6xl mx-auto bg-slate-50 relative ${
+        gameState === 'start' || gameState === 'sorting'
+          ? 'h-[100dvh] overflow-hidden'
+          : 'min-h-[100dvh] overflow-y-auto'
+      }`}
+    >
       {/* Global Navigation Overlays */}
       <div className="absolute top-4 right-4 z-50 flex gap-2 no-print">
         {(gameState === 'start' || gameState === 'sorting') && (
@@ -458,27 +464,27 @@ export default function App() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.1 }}
-            className="flex-grow flex flex-col items-center justify-center text-center gap-8"
+            className="start-screen flex-grow flex flex-col items-center justify-center text-center gap-5 md:gap-8 pt-6 md:pt-0 min-h-0"
           >
             <div className="relative">
-              <div className="text-[10rem] animate-bounce-gentle">🦁</div>
-              <div className="absolute -top-4 -right-4 text-5xl">🎓</div>
+              <div className="text-[7rem] md:text-[10rem] animate-bounce-gentle leading-none">🦁</div>
+              <div className="absolute -top-3 -right-3 md:-top-4 md:-right-4 text-4xl md:text-5xl">🎓</div>
             </div>
             <div className="space-y-2">
-              <h1 className="text-7xl font-black text-green-600 tracking-tight">Zoologist Academy</h1>
-              <p className="text-3xl font-medium text-slate-500">Become a real animal scientist!</p>
+              <h1 className="text-5xl md:text-7xl font-black text-green-600 tracking-tight">Zoologist Academy</h1>
+              <p className="text-xl md:text-3xl font-medium text-slate-500">Become a real animal scientist!</p>
             </div>
-            <div className="flex flex-col gap-4 w-full max-w-md">
+            <div className="flex flex-col gap-3 md:gap-4 w-full max-w-sm md:max-w-md pb-2">
               <button 
                 onClick={() => setGameState('sorting')}
-                className="btn-primary text-5xl py-10 w-full"
+                className="btn-primary text-3xl md:text-5xl py-6 md:py-10 w-full"
               >
                 START TRAINING
               </button>
               
               <button 
                 onClick={skipToFieldGuide}
-                className="text-slate-400 font-bold hover:text-slate-600 transition-colors flex items-center justify-center gap-2 text-xl"
+                className="text-slate-400 font-bold hover:text-slate-600 transition-colors flex items-center justify-center gap-2 text-lg md:text-xl"
               >
                 <BookOpen size={24} /> Skip to Field Guide
               </button>
@@ -493,37 +499,37 @@ export default function App() {
             initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
-            className="flex-grow flex flex-col gap-4 h-full"
+            className="sorting-screen flex-grow flex flex-col gap-3 md:gap-4 h-full min-h-0"
           >
             <div className="flex flex-col gap-4 h-full min-h-0 overflow-hidden">
-              <header className="bg-white p-4 md:p-6 rounded-[35px] shadow-md border-b-4 border-green-200 flex justify-between items-center shrink-0">
-                <div className="flex items-center gap-4">
-                  <div className="bg-blue-100 p-3 rounded-2xl text-blue-600">
-                    <Search size={32} />
+              <header className="bg-white p-3 md:p-6 rounded-[26px] md:rounded-[35px] shadow-md border-b-4 border-green-200 flex justify-between items-center shrink-0">
+                <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                  <div className="bg-blue-100 p-2 md:p-3 rounded-2xl text-blue-600 shrink-0">
+                    <Search size={24} />
                   </div>
-                  <div className="text-left">
-                    <h2 className="text-2xl md:text-4xl font-black text-slate-800 leading-none uppercase tracking-tight">{currentMission.instruction}</h2>
+                  <div className="text-left min-w-0">
+                    <h2 className="text-xl md:text-4xl font-black text-slate-800 leading-none uppercase tracking-tight truncate">{currentMission.instruction}</h2>
                     <p className="text-blue-400 font-bold text-[10px] uppercase tracking-widest mt-1">Digital Training Phase</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <button 
                     onClick={() => handleSpeak(currentMission.audioText)}
-                    className={`p-4 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+                    className={`p-3 md:p-4 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
                   >
                     {isSpeaking ? <VolumeX size={24} /> : <Volume2 size={24} />}
                   </button>
                 </div>
               </header>
 
-              <div className="flex-[3] grid grid-cols-2 gap-4 min-h-0">
+              <div className="flex-[3] grid grid-cols-2 gap-2 md:gap-4 min-h-0">
                 <div id="zone-left" className={`drop-zone bg-blue-50 border-blue-200 shadow-inner flex flex-col min-h-0 ${allSorted ? 'opacity-50' : ''}`}>
-                  <div className="flex items-center gap-3 p-4 shrink-0">
-                    <span className="text-4xl drop-shadow-sm">{currentMission.leftIcon}</span>
-                    <span className="text-xl font-black text-blue-700 uppercase leading-none">{currentMission.leftLabel}</span>
+                  <div className="flex items-center gap-2 md:gap-3 p-2 md:p-4 shrink-0">
+                    <span className="text-3xl md:text-4xl drop-shadow-sm">{currentMission.leftIcon}</span>
+                    <span className="text-base md:text-xl font-black text-blue-700 uppercase leading-none">{currentMission.leftLabel}</span>
                   </div>
-                  <div className="flex-grow overflow-y-auto p-4">
-                    <div className="flex flex-wrap gap-3 justify-center content-start">
+                  <div className="flex-grow overflow-y-auto p-2 md:p-4">
+                    <div className="flex flex-wrap gap-2 md:gap-3 justify-center content-start">
                       {Object.entries(sortedItems)
                         .filter(([_, cat]) => cat === 'left')
                         .map(([id]) => (
@@ -541,12 +547,12 @@ export default function App() {
                 </div>
 
                 <div id="zone-right" className={`drop-zone bg-orange-50 border-orange-200 shadow-inner flex flex-col min-h-0 ${allSorted ? 'opacity-50' : ''}`}>
-                  <div className="flex items-center gap-3 p-4 shrink-0">
-                    <span className="text-4xl drop-shadow-sm">{currentMission.rightIcon}</span>
-                    <span className="text-xl font-black text-orange-700 uppercase leading-none">{currentMission.rightLabel}</span>
+                  <div className="flex items-center gap-2 md:gap-3 p-2 md:p-4 shrink-0">
+                    <span className="text-3xl md:text-4xl drop-shadow-sm">{currentMission.rightIcon}</span>
+                    <span className="text-base md:text-xl font-black text-orange-700 uppercase leading-none">{currentMission.rightLabel}</span>
                   </div>
-                  <div className="flex-grow overflow-y-auto p-4">
-                    <div className="flex flex-wrap gap-3 justify-center content-start">
+                  <div className="flex-grow overflow-y-auto p-2 md:p-4">
+                    <div className="flex flex-wrap gap-2 md:gap-3 justify-center content-start">
                       {Object.entries(sortedItems)
                         .filter(([_, cat]) => cat === 'right')
                         .map(([id]) => (
@@ -586,9 +592,9 @@ export default function App() {
                 )}
               </AnimatePresence>
 
-              <div className="flex-1 bg-white p-4 rounded-[35px] shadow-inner border-2 border-slate-100 flex justify-center items-center shrink-0 relative z-10">
+              <div className="flex-1 bg-white p-2 md:p-4 rounded-[24px] md:rounded-[35px] shadow-inner border-2 border-slate-100 flex justify-center items-center shrink-0 relative z-10 min-h-0">
                 {!allSorted ? (
-                  <div className="flex flex-wrap justify-center gap-4 w-full">
+                  <div className="flex flex-wrap justify-center gap-2 md:gap-4 w-full">
                     {currentMission.items
                       .filter(item => !sortedItems[item.id])
                       .map(item => (
@@ -607,7 +613,7 @@ export default function App() {
                             if (leftZone && x >= leftZone.left && x <= leftZone.right) handleDrop(item.id, 'left');
                             else if (rightZone && x >= rightZone.left && x <= rightZone.right) handleDrop(item.id, 'right');
                           }}
-                          className="text-5xl md:text-6xl w-16 h-16 md:w-24 md:h-24 flex items-center justify-center bg-white rounded-2xl shadow-lg border-2 border-slate-50 cursor-grab shrink-0 touch-none select-none"
+                          className="text-4xl md:text-6xl w-14 h-14 md:w-24 md:h-24 flex items-center justify-center bg-white rounded-2xl shadow-lg border-2 border-slate-50 cursor-grab shrink-0 touch-none select-none"
                         >
                           {item.emoji}
                         </motion.div>
