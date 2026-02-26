@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Quicksand", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 overflow-hidden select-none;
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-3xl font-bold text-2xl shadow-lg active:scale-95 transition-all border-b-4 border-green-700;
+  }
+  
+  .card-animal {
+    @apply bg-white p-4 rounded-3xl shadow-md border-2 border-slate-100 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing transition-transform;
+  }
+
+  .drop-zone {
+    @apply border-4 border-dashed rounded-[40px] p-6 flex flex-col items-center justify-start transition-all min-h-[300px];
+  }
+}
+
+/* Custom animations */
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 2s infinite ease-in-out;
+}
