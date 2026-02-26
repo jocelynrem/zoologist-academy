@@ -42,6 +42,12 @@ Setup:
 1. Push to `main`.
 2. In GitHub repo settings, set Pages source to `GitHub Actions`.
 3. Workflow builds and deploys `dist/` automatically.
+4. Open the project URL: `https://<your-github-username>.github.io/zoologist-academy/`
+
+If you see a 404:
+- Confirm Pages is configured to `GitHub Actions` (not `Deploy from a branch`).
+- Confirm the deploy workflow completed successfully in the `Actions` tab.
+- Use the project URL with the repo name suffix (for this repo, `/zoologist-academy/`).
 
 ## Important Notes
 
