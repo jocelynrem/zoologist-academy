@@ -431,16 +431,6 @@ export default function App() {
     >
       {/* Global Navigation Overlays */}
       <div className="absolute top-4 right-4 z-50 flex gap-2 no-print">
-        {gameState === 'start' && (
-          <button 
-            onClick={skipToFieldGuide}
-            className="bg-white/80 backdrop-blur-sm p-2 rounded-xl shadow-sm border border-slate-200 text-slate-400 hover:text-blue-500 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
-            title="Skip to Field Guide"
-          >
-            <BookOpen size={16} />
-            <span>Field Guide</span>
-          </button>
-        )}
         {gameState === 'celebration' && (
           <button 
             onClick={backToStart}
