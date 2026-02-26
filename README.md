@@ -1,19 +1,49 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Zoologist Academy
 
-# Run and deploy your AI Studio app
+Interactive kid-friendly zoology game built with React + Vite.
 
-This contains everything you need to run your app locally.
+## Current Audio Setup
 
-View your app in AI Studio: https://ai.studio/apps/3d801a27-46a3-4781-b6b4-341148cc2076
+- Audio is pre-generated and embedded as static `.wav` files.
+- Files live in `public/audio/` and are served from `/audio/...`.
+- No runtime TTS generation is used.
+- No Gemini API key is required.
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+Prerequisites:
+- Node.js
 
+Commands:
+1. `npm install`
+2. `npm run dev`
+3. Open `http://localhost:3000`
 
-1. Install dependencies:
-   `npm install`
-2. Run the app:
-   `npm run dev`
+## Build
+
+1. `npm run build`
+2. Build output is written to `dist/`
+
+## Deploy Options
+
+### Option 1: Node/Express Hosting
+
+Deploy the project and run:
+- `npm install`
+- `npm run build`
+- `npm start`
+
+### Option 2: GitHub Pages (Static Hosting)
+
+This repo includes a Pages workflow at:
+- `.github/workflows/deploy-pages.yml`
+
+Setup:
+1. Push to `main`.
+2. In GitHub repo settings, set Pages source to `GitHub Actions`.
+3. Workflow builds and deploys `dist/` automatically.
+
+## Important Notes
+
+- Keep `public/audio/*.wav` in the repository, since playback depends on them.
+- If audio files are missing, playback buttons will fail because there is no speech-synthesis fallback.
