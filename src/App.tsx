@@ -414,7 +414,7 @@ export default function App() {
   return (
     <div
       className={`app-shell w-full flex flex-col p-3 md:p-6 max-w-6xl mx-auto bg-slate-50 relative ${
-        gameState === 'start' || gameState === 'sorting'
+        gameState === 'start' || gameState === 'sorting' || gameState === 'field-guide'
           ? 'h-[100dvh] overflow-hidden'
           : 'min-h-[100dvh] overflow-y-auto'
       }`}
@@ -431,9 +431,6 @@ export default function App() {
             <span className="hidden sm:inline">Field Guide</span>
           </button>
         )}
-      </div>
-      
-      <div className="absolute top-4 left-4 z-50 flex gap-2 no-print">
         {(gameState === 'field-guide' || gameState === 'celebration') && (
           <button 
             onClick={() => {
@@ -648,30 +645,28 @@ export default function App() {
             exit={{ opacity: 0, y: -100 }}
             className="flex-grow flex flex-col gap-3 md:gap-4 h-full min-h-0"
           >
-            <div className="field-guide-shell bg-white p-3 md:p-6 rounded-[28px] md:rounded-[40px] shadow-lg border-2 border-slate-100 flex flex-col flex-grow overflow-hidden gap-3 border-t-8 border-t-yellow-400">
-              <header className="field-guide-header flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center shrink-0">
-                <div className="flex items-center gap-3 md:gap-5">
-                  <div className="field-guide-icon p-3 md:p-4 bg-yellow-50 rounded-3xl text-yellow-600">
-                    <span className="field-guide-icon-emoji text-4xl md:text-7xl drop-shadow-sm">{currentFieldMission.icon}</span>
+            <div className="field-guide-shell bg-white p-2 sm:p-3 md:p-4 rounded-[28px] md:rounded-[40px] shadow-lg border-2 border-slate-100 flex flex-col flex-grow overflow-hidden gap-2 md:gap-3 border-t-8 border-t-yellow-400 h-full min-h-0">
+              <header className="field-guide-header grid grid-cols-[auto_1fr_auto] items-center gap-2 md:gap-4 shrink-0">
+                <div className="field-guide-icon p-2 md:p-3 bg-yellow-50 rounded-3xl text-yellow-600">
+                  <span className="field-guide-icon-emoji text-3xl md:text-6xl drop-shadow-sm">{currentFieldMission.icon}</span>
+                </div>
+                <div className="text-left min-w-0">
+                  <div className="field-guide-meta flex items-center gap-2 mb-1">
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest leading-none">Field Log 📔</h3>
+                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Mission {currentFieldIdx + 1} of {shuffledFieldMissions.length}</span>
                   </div>
-                  <div className="text-left">
-                    <div className="field-guide-meta flex items-center gap-2 mb-1">
-                      <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest leading-none">Field Log 📔</h3>
-                      <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Mission {currentFieldIdx + 1} of {shuffledFieldMissions.length}</span>
-                    </div>
-                    <h2 className="field-guide-title text-base md:text-xl font-black text-slate-800 leading-tight uppercase">MISSION: FIND IT!</h2>
-                    <p className="field-guide-task text-sm md:text-lg font-bold text-blue-600 leading-tight">{currentFieldMission.task}</p>
-                  </div>
+                  <h2 className="field-guide-title text-base md:text-xl font-black text-slate-800 leading-tight uppercase">MISSION: FIND IT!</h2>
+                  <p className="field-guide-task text-sm md:text-lg font-bold text-blue-600 leading-tight">{currentFieldMission.task}</p>
                 </div>
                 <button 
                   onClick={() => handleSpeak(currentFieldMission.audioText)}
-                  className={`field-guide-audio self-end sm:self-auto p-3 md:p-5 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+                  className={`field-guide-audio p-2 md:p-3 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
                 >
-                  {isSpeaking ? <VolumeX size={24} /> : <Volume2 size={24} />}
+                  {isSpeaking ? <VolumeX size={20} /> : <Volume2 size={20} />}
                 </button>
               </header>
 
-              <div className="drawing-stage flex-grow flex flex-col min-h-[42vh] md:min-h-0">
+              <div className="drawing-stage flex-1 min-h-0">
                 <DrawingCanvas 
                   initialImage={fieldDrawings[currentFieldMission.id]}
                   onDraw={() => setHasDrawn(true)} 
@@ -682,13 +677,13 @@ export default function App() {
               <footer className="field-guide-footer flex gap-2 md:gap-3 shrink-0">
                 <button 
                   onClick={prevFieldMission}
-                  className={`bg-slate-100 text-slate-500 px-4 md:px-8 rounded-[18px] md:rounded-[25px] font-black text-xl md:text-2xl shadow active:scale-95 transition-transform ${currentFieldIdx === 0 ? 'opacity-30 pointer-events-none' : ''}`}
+                  className={`bg-slate-100 text-slate-500 px-4 md:px-7 rounded-[18px] md:rounded-[25px] font-black text-lg md:text-2xl shadow active:scale-95 transition-transform ${currentFieldIdx === 0 ? 'opacity-30 pointer-events-none' : ''}`}
                 >
                   ◀
                 </button>
                 <button 
                   onClick={nextFieldMission}
-                  className={`flex-grow bg-green-500 text-white py-3 md:py-5 rounded-[18px] md:rounded-[25px] font-black text-base md:text-2xl shadow-xl active:scale-95 transition-transform border-b-6 border-green-700 ${(!hasDrawn && !fieldDrawings[currentFieldMission.id]) ? 'opacity-50 grayscale' : ''}`}
+                  className={`flex-grow bg-green-500 text-white py-2.5 md:py-4 rounded-[18px] md:rounded-[25px] font-black text-sm md:text-xl shadow-xl active:scale-95 transition-transform border-b-6 border-green-700 ${(!hasDrawn && !fieldDrawings[currentFieldMission.id]) ? 'opacity-50 grayscale' : ''}`}
                 >
                   I FOUND IT! ➔
                 </button>
@@ -704,7 +699,7 @@ export default function App() {
                       setHasDrawn(false);
                     }
                   }}
-                  className={`bg-slate-100 text-slate-500 px-4 md:px-8 rounded-[18px] md:rounded-[25px] font-black text-xl md:text-2xl shadow active:scale-95 transition-transform ${currentFieldIdx === shuffledFieldMissions.length - 1 ? 'opacity-30 pointer-events-none' : ''}`}
+                  className={`bg-slate-100 text-slate-500 px-4 md:px-7 rounded-[18px] md:rounded-[25px] font-black text-lg md:text-2xl shadow active:scale-95 transition-transform ${currentFieldIdx === shuffledFieldMissions.length - 1 ? 'opacity-30 pointer-events-none' : ''}`}
                 >
                   ▶
                 </button>

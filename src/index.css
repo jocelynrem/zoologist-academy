@@ -61,10 +61,6 @@
     line-height: 1.2;
   }
 
-  .drawing-stage {
-    min-height: 50vh;
-  }
-
   .drawing-palette {
     bottom: calc(0.5rem + env(safe-area-inset-bottom));
   }
@@ -79,12 +75,6 @@
   .field-guide-shell {
     gap: 0.5rem;
     padding: 0.5rem;
-  }
-
-  .field-guide-header {
-    flex-direction: row;
-    gap: 0.5rem;
-    align-items: center;
   }
 
   .field-guide-icon {
@@ -112,10 +102,6 @@
 
   .field-guide-audio {
     padding: 0.5rem;
-  }
-
-  .drawing-stage {
-    min-height: 56vh;
   }
 
   .field-guide-footer button {
