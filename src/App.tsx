@@ -240,7 +240,7 @@ const DrawingCanvas = ({ initialImage, onDraw, onSave }: { initialImage?: string
       />
       
       {/* Integrated Color Palette */}
-      <div className="drawing-palette absolute left-1/2 -translate-x-1/2 bottom-3 md:left-4 md:top-1/2 md:-translate-x-0 md:-translate-y-1/2 flex md:flex-col items-center justify-center gap-3 md:gap-4 px-3 py-3 md:px-5 md:py-6 md:min-w-[5.5rem] md:min-h-[24rem] bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-slate-100">
+      <div className="drawing-palette absolute left-1/2 -translate-x-1/2 bottom-3 md:bottom-4 flex items-center justify-center gap-3 px-3 py-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-slate-100">
         {['#000000', '#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7'].map(c => (
           <button
             key={c}
