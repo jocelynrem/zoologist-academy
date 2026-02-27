@@ -240,13 +240,14 @@ const DrawingCanvas = ({ initialImage, onDraw, onSave }: { initialImage?: string
       />
       
       {/* Integrated Color Palette */}
-      <div className="drawing-palette absolute left-1/2 -translate-x-1/2 bottom-3 md:left-4 md:top-1/2 md:-translate-x-0 md:-translate-y-1/2 flex md:flex-col gap-2 md:gap-3 p-2 bg-white/85 backdrop-blur-sm rounded-full shadow-lg border border-slate-100">
+      <div className="drawing-palette absolute left-1/2 -translate-x-1/2 bottom-3 md:left-4 md:top-1/2 md:-translate-x-0 md:-translate-y-1/2 flex md:flex-col items-center justify-center gap-3 md:gap-4 px-3 py-3 md:px-5 md:py-6 md:min-w-[5.5rem] md:min-h-[24rem] bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-slate-100">
         {['#000000', '#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7'].map(c => (
           <button
             key={c}
             onClick={() => setColor(c)}
-            className={`w-8 h-8 md:w-10 md:h-10 rounded-full border-2 transition-all active:scale-90 ${color === c ? 'scale-125 border-slate-400 shadow-md' : 'border-white'}`}
+            className={`w-10 h-10 md:w-12 md:h-12 shrink-0 rounded-full border-2 transition-all active:scale-90 ${color === c ? 'scale-105 border-slate-400 shadow-md' : 'border-white'}`}
             style={{ backgroundColor: c }}
+            aria-label={`Select color ${c}`}
           />
         ))}
       </div>
@@ -273,7 +274,6 @@ export default function App() {
   const [showWrongDropCue, setShowWrongDropCue] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const wrongDropTimerRef = useRef<number | null>(null);
-  const lastAutoPlayKeyRef = useRef<string | null>(null);
 
   const currentMission = MISSIONS[currentMissionIdx];
   const currentFieldMission = shuffledFieldMissions[currentFieldIdx];
@@ -398,28 +398,6 @@ export default function App() {
     setCurrentFieldIdx(0);
     setSortedItems({});
   };
-
-  useEffect(() => {
-    if (gameState === 'start' || gameState === 'celebration') {
-      lastAutoPlayKeyRef.current = null;
-      return;
-    }
-
-    if (gameState === 'sorting') {
-      const key = `sorting-${currentMissionIdx}`;
-      if (lastAutoPlayKeyRef.current === key) return;
-      lastAutoPlayKeyRef.current = key;
-      handleSpeak(currentMission.audioText);
-      return;
-    }
-
-    if (gameState === 'field-guide' && currentFieldMission) {
-      const key = `field-${currentFieldMission.id}-${currentFieldIdx}`;
-      if (lastAutoPlayKeyRef.current === key) return;
-      lastAutoPlayKeyRef.current = key;
-      handleSpeak(currentFieldMission.audioText);
-    }
-  }, [gameState, currentMissionIdx, currentFieldIdx, currentMission.audioText, currentFieldMission]);
 
   return (
     <div
@@ -642,17 +620,7 @@ export default function App() {
             exit={{ opacity: 0, y: -100 }}
             className="flex-grow flex flex-col gap-3 md:gap-4 h-full min-h-0"
           >
-            <div className="flex justify-end shrink-0">
-              <button 
-                onClick={backToStart}
-                className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
-                title="Back to Start"
-              >
-                <RotateCcw size={16} />
-                <span>Start</span>
-              </button>
-            </div>
-            <div className="field-guide-shell bg-white p-2 sm:p-3 md:p-4 rounded-[28px] md:rounded-[40px] shadow-lg border-2 border-slate-100 flex flex-col flex-grow overflow-hidden gap-2 md:gap-3 border-t-8 border-t-yellow-400 h-full min-h-0">
+            <div className="field-guide-shell relative bg-white p-2 sm:p-3 md:p-4 rounded-[28px] md:rounded-[40px] shadow-lg border-2 border-slate-100 flex flex-col flex-grow overflow-hidden gap-2 md:gap-3 border-t-8 border-t-yellow-400 h-full min-h-0">
               <header className="field-guide-header grid grid-cols-[auto_1fr_auto] items-center gap-2 md:gap-4 shrink-0">
                 <div className="field-guide-icon p-2 md:p-3 bg-yellow-50 rounded-3xl text-yellow-600">
                   <span className="field-guide-icon-emoji text-3xl md:text-6xl drop-shadow-sm">{currentFieldMission.icon}</span>
@@ -665,12 +633,24 @@ export default function App() {
                   <h2 className="field-guide-title text-base md:text-xl font-black text-slate-800 leading-tight uppercase">MISSION: FIND IT!</h2>
                   <p className="field-guide-task text-sm md:text-lg font-bold text-blue-600 leading-tight">{currentFieldMission.task}</p>
                 </div>
-                <button 
-                  onClick={() => handleSpeak(currentFieldMission.audioText)}
-                  className={`field-guide-audio p-2 md:p-4 rounded-full shadow-lg transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
-                >
-                  {isSpeaking ? <VolumeX size={22} /> : <Volume2 size={22} />}
-                </button>
+                <div className="flex items-center gap-2 md:gap-3">
+                  <button
+                    onClick={backToStart}
+                    className="bg-white p-2.5 md:p-3 rounded-full shadow-sm border border-slate-200 text-slate-400 hover:text-slate-600 transition-colors active:scale-95"
+                    title="Back to Start"
+                    aria-label="Back to Start"
+                  >
+                    <RotateCcw size={18} />
+                  </button>
+                  <button 
+                    onClick={() => handleSpeak(currentFieldMission.audioText)}
+                    className={`field-guide-audio p-3 md:p-5 min-w-12 min-h-12 md:min-w-16 md:min-h-16 rounded-full shadow-lg border-2 border-white transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse scale-105' : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105'}`}
+                    title={isSpeaking ? 'Stop audio' : 'Play audio'}
+                    aria-label={isSpeaking ? 'Stop audio' : 'Play audio'}
+                  >
+                    {isSpeaking ? <VolumeX size={28} /> : <Volume2 size={28} />}
+                  </button>
+                </div>
               </header>
 
               <div className="drawing-stage flex-1 min-h-0">
