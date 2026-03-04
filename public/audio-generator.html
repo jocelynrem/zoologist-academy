@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zoologist Audio Generator</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --line: #e2e8f0;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --danger: #dc2626;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.7rem;
+    }
+    p {
+      margin: 0 0 16px;
+      color: var(--muted);
+    }
+    label {
+      display: block;
+      font-weight: 700;
+      margin: 12px 0 6px;
+    }
+    input, textarea, select, button {
+      font: inherit;
+    }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #fff;
+    }
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 12px;
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    #generateBtn { background: var(--blue); }
+    #saveBtn { background: var(--green); }
+    #downloadBtn { background: #334155; }
+    #fillBtn { background: #64748b; }
+    button[disabled] { opacity: 0.5; cursor: not-allowed; }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-top: 10px;
+      word-break: break-all;
+    }
+    .ok { color: var(--green); font-weight: 700; }
+    .err { color: var(--danger); font-weight: 700; }
+    audio {
+      width: 100%;
+      margin-top: 12px;
+    }
+    .small {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+    .log {
+      margin-top: 10px;
+      max-height: 180px;
+      overflow: auto;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #f8fafc;
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+    @media (max-width: 720px) {
+      .row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Gemini Audio Generator</h1>
+    <p>Paste your Gemini API key, generate speech from text, then save it directly into <code>public/audio</code> using the required hash filename.</p>
+
+    <label for="apiKey">Gemini API Key</label>
+    <input id="apiKey" type="password" placeholder="AIza..." autocomplete="off" />
+
+    <div class="row">
+      <div>
+        <label for="text">Text To Record</label>
+        <textarea id="text"></textarea>
+      </div>
+      <div>
+        <label for="voice">Voice</label>
+        <select id="voice">
+          <option value="Kore">Kore</option>
+          <option value="Puck">Puck</option>
+          <option value="Zephyr">Zephyr</option>
+          <option value="Aoede">Aoede</option>
+          <option value="Orus">Orus</option>
+          <option value="Leda">Leda</option>
+          <option value="Charon">Charon</option>
+          <option value="Fenrir">Fenrir</option>
+        </select>
+        <label for="lineSelect">Quick Fill</label>
+        <select id="lineSelect">
+          <option value="">Select a game line...</option>
+        </select>
+        <button id="fillBtn" type="button" style="margin-top:8px;width:100%;">Use Selected Line</button>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button id="generateBtn" type="button">Generate Audio</button>
+      <button id="previewBtn" type="button" disabled>Preview Audio</button>
+      <button id="saveBtn" type="button" disabled>Save To Project Audio Folder</button>
+      <button id="downloadBtn" type="button" disabled>Download WAV</button>
+      <button id="batchBtn" type="button">Generate + Save All Lines</button>
+    </div>
+
+    <div id="hash" class="mono">Hash filename: (enter text)</div>
+    <div id="status" class="small">Status: waiting</div>
+    <div id="log" class="log">Batch log: idle</div>
+    <audio id="player" controls></audio>
+  </main>
+
+  <script>
+    const GAME_LINES = [
+      "Level One! Sort what is living and what is non-living. Living things grow, move, and need air, water, and food. Non-living things do not.",
+      "Level Two! These are all birds. Put birds that fly in the Fly group. Put birds that swim in the Swim group.",
+      "Final Level! Compare animal body structures. Some animals have hard shells and others have scales. Sort each animal by its structure.",
+      "Find one non-living classroom object, like a chair, book, or pencil. Draw it.",
+      "Find one living thing. It can be real or in a classroom picture. Draw it.",
+      "Find an animal with fur in a book, poster, or toy. Draw it.",
+      "Find an animal with feathers in a book or poster. Draw it.",
+      "Find an animal with scales in a book, poster, or toy. Draw it.",
+      "Find an animal with a shell in a book, poster, or toy. Draw it.",
+      "Find an animal that flies in a book or poster. Draw it.",
+      "Find two birds that look different in a book or poster. Draw both.",
+      "Scientist! Don't forget to draw what you found in your field guide!"
+    ];
+
+    const apiKeyInput = document.getElementById("apiKey");
+    const textInput = document.getElementById("text");
+    const voiceInput = document.getElementById("voice");
+    const lineSelect = document.getElementById("lineSelect");
+    const fillBtn = document.getElementById("fillBtn");
+    const generateBtn = document.getElementById("generateBtn");
+    const previewBtn = document.getElementById("previewBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const batchBtn = document.getElementById("batchBtn");
+    const hashEl = document.getElementById("hash");
+    const statusEl = document.getElementById("status");
+    const logEl = document.getElementById("log");
+    const player = document.getElementById("player");
+
+    let lastWavBytes = null;
+    let lastAudioMimeType = "audio/wav";
+    let lastFilename = "";
+
+    for (const line of GAME_LINES) {
+      const opt = document.createElement("option");
+      opt.value = line;
+      opt.textContent = line.length > 80 ? line.slice(0, 80) + "..." : line;
+      lineSelect.appendChild(opt);
+    }
+
+    fillBtn.addEventListener("click", () => {
+      if (!lineSelect.value) return;
+      textInput.value = lineSelect.value;
+      updateHashView();
+    });
+
+    textInput.addEventListener("input", updateHashView);
+
+    function setStatus(text, isError) {
+      statusEl.className = isError ? "small err" : "small ok";
+      statusEl.textContent = text;
+    }
+
+    function looksLikeGeminiKey(key) {
+      return /^AIza[0-9A-Za-z\-_]{20,}$/.test(key);
+    }
+
+    function setLog(lines) {
+      logEl.textContent = lines.join("\n");
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    async function hashText(text) {
+      const encoded = new TextEncoder().encode(text);
+      const digest = await crypto.subtle.digest("SHA-256", encoded);
+      return Array.from(new Uint8Array(digest))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("")
+        .substring(0, 16);
+    }
+
+    function updateHashView() {
+      const text = textInput.value.trim();
+      if (!text) {
+        hashEl.textContent = "Hash filename: (enter text)";
+        return;
+      }
+      hashText(text).then((hash) => {
+        hashEl.textContent = `Hash filename: ${hash}.wav`;
+      });
+    }
+
+    function base64ToBytes(base64) {
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    function wrapPcmAsWav(pcmBytes, sampleRate = 24000, channels = 1, bitsPerSample = 16) {
+      const blockAlign = channels * bitsPerSample / 8;
+      const byteRate = sampleRate * blockAlign;
+      const wav = new Uint8Array(44 + pcmBytes.length);
+      const view = new DataView(wav.buffer);
+
+      function writeString(offset, str) {
+        for (let i = 0; i < str.length; i++) {
+          view.setUint8(offset + i, str.charCodeAt(i));
+        }
+      }
+
+      writeString(0, "RIFF");
+      view.setUint32(4, 36 + pcmBytes.length, true);
+      writeString(8, "WAVE");
+      writeString(12, "fmt ");
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, channels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, byteRate, true);
+      view.setUint16(32, blockAlign, true);
+      view.setUint16(34, bitsPerSample, true);
+      writeString(36, "data");
+      view.setUint32(40, pcmBytes.length, true);
+      wav.set(pcmBytes, 44);
+      return wav;
+    }
+
+    function bytesToBase64(bytes) {
+      let binary = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      }
+      return btoa(binary);
+    }
+
+    async function generateAudio() {
+      const apiKey = apiKeyInput.value.trim();
+      const text = textInput.value.trim();
+      const voice = voiceInput.value;
+
+      if (!apiKey) {
+        setStatus("Status: enter your Gemini API key", true);
+        return;
+      }
+      if (!looksLikeGeminiKey(apiKey)) {
+        setStatus("Status: API key looks invalid. It should start with AIza...", true);
+        return;
+      }
+      if (!text) {
+        setStatus("Status: enter text to record", true);
+        return;
+      }
+
+      generateBtn.disabled = true;
+      previewBtn.disabled = true;
+      saveBtn.disabled = true;
+      downloadBtn.disabled = true;
+      setStatus("Status: generating...", false);
+
+      try {
+        const hash = await hashText(text);
+        lastFilename = `${hash}.wav`;
+        hashEl.textContent = `Hash filename: ${lastFilename}`;
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text }] }],
+            generationConfig: {
+              responseModalities: ["AUDIO"],
+              speechConfig: {
+                voiceConfig: {
+                  prebuiltVoiceConfig: { voiceName: voice }
+                }
+              }
+            }
+          })
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Gemini error ${res.status}: ${errText}`);
+        }
+
+        const data = await res.json();
+        const part = data && data.candidates && data.candidates[0] && data.candidates[0].content &&
+          Array.isArray(data.candidates[0].content.parts)
+          ? data.candidates[0].content.parts.find((p) => p.inlineData && p.inlineData.data)
+          : null;
+
+        if (!part) {
+          throw new Error("No audio was returned. Verify model availability for your key.");
+        }
+
+        const mimeType = (part.inlineData.mimeType || "").toLowerCase();
+        const rawBytes = base64ToBytes(part.inlineData.data);
+        const wavBytes = (mimeType.includes("audio/pcm") || mimeType.includes("audio/l16"))
+          ? wrapPcmAsWav(rawBytes, 24000, 1, 16)
+          : rawBytes;
+        lastAudioMimeType = (mimeType.includes("audio/pcm") || mimeType.includes("audio/l16"))
+          ? "audio/wav"
+          : (mimeType || "audio/wav");
+
+        lastWavBytes = wavBytes;
+        const blob = new Blob([wavBytes], { type: lastAudioMimeType });
+        const url = URL.createObjectURL(blob);
+        player.pause();
+        player.currentTime = 0;
+        player.src = url;
+        player.load();
+
+        previewBtn.disabled = false;
+        saveBtn.disabled = false;
+        downloadBtn.disabled = false;
+        setStatus(`Status: generated (${lastAudioMimeType}). Click Preview Audio, then save if it sounds right.`, false);
+      } catch (error) {
+        console.error(error);
+        setStatus(`Status: ${error.message || "generation failed"}`, true);
+      } finally {
+        generateBtn.disabled = false;
+      }
+    }
+
+    async function saveToProject() {
+      if (!lastWavBytes || !lastFilename) return;
+      saveBtn.disabled = true;
+      setStatus("Status: saving to project...", false);
+      try {
+        const dataBase64 = bytesToBase64(lastWavBytes);
+        const res = await fetch("/api/audio/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: lastFilename, dataBase64 })
+        });
+        const payload = await res.json();
+        if (!res.ok) {
+          throw new Error(payload.error || "save failed");
+        }
+        setStatus(`Status: saved to /public/audio/${lastFilename}`, false);
+      } catch (error) {
+        console.error(error);
+        setStatus(`Status: ${error.message || "save failed"}`, true);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    function downloadWav() {
+      if (!lastWavBytes || !lastFilename) return;
+      const blob = new Blob([lastWavBytes], { type: lastAudioMimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = lastFilename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function previewAudio() {
+      if (!player.src) return;
+      try {
+        await player.play();
+        setStatus("Status: playing preview audio.", false);
+      } catch (error) {
+        console.error(error);
+        setStatus("Status: preview failed. Try pressing play on the audio controls below.", true);
+      }
+    }
+
+    async function generateLineAudio(apiKey, text, voice) {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${encodeURIComponent(apiKey)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text }] }],
+          generationConfig: {
+            responseModalities: ["AUDIO"],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: voice }
+              }
+            }
+          }
+        })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Gemini error ${res.status}: ${errText}`);
+      }
+
+      const data = await res.json();
+      const part = data && data.candidates && data.candidates[0] && data.candidates[0].content &&
+        Array.isArray(data.candidates[0].content.parts)
+        ? data.candidates[0].content.parts.find((p) => p.inlineData && p.inlineData.data)
+        : null;
+
+      if (!part) {
+        throw new Error("No audio returned");
+      }
+
+      const mimeType = (part.inlineData.mimeType || "").toLowerCase();
+      const rawBytes = base64ToBytes(part.inlineData.data);
+      return (mimeType.includes("audio/pcm") || mimeType.includes("audio/l16"))
+        ? wrapPcmAsWav(rawBytes, 24000, 1, 16)
+        : rawBytes;
+    }
+
+    async function saveBytes(filename, bytes) {
+      const dataBase64 = bytesToBase64(bytes);
+      const res = await fetch("/api/audio/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename, dataBase64 })
+      });
+      const raw = await res.text();
+      let payload = null;
+      if (raw) {
+        try {
+          payload = JSON.parse(raw);
+        } catch {
+          payload = null;
+        }
+      }
+      if (!res.ok) {
+        if (res.status === 404) {
+          throw new Error("save API not found (404). Run app with `npm run dev` and open http://localhost:3000/audio-generator.html");
+        }
+        const msg = payload && payload.error
+          ? payload.error
+          : `save failed (${res.status})${raw ? `: ${raw.slice(0, 200)}` : ""}`;
+        throw new Error(msg);
+      }
+    }
+
+    async function generateAndSaveAllLines() {
+      const apiKey = apiKeyInput.value.trim();
+      const voice = voiceInput.value || "Kore";
+      if (!apiKey) {
+        setStatus("Status: enter your Gemini API key", true);
+        return;
+      }
+      if (!looksLikeGeminiKey(apiKey)) {
+        setStatus("Status: API key looks invalid. It should start with AIza...", true);
+        return;
+      }
+
+      generateBtn.disabled = true;
+      previewBtn.disabled = true;
+      saveBtn.disabled = true;
+      downloadBtn.disabled = true;
+      batchBtn.disabled = true;
+
+      const logs = [`Batch started: ${new Date().toLocaleTimeString()}`, `Voice: ${voice}`, `Total lines: ${GAME_LINES.length}`];
+      setLog(logs);
+      setStatus("Status: generating and saving all lines...", false);
+
+      let success = 0;
+      const failures = [];
+
+      try {
+        for (let i = 0; i < GAME_LINES.length; i++) {
+          const line = GAME_LINES[i];
+          const hash = await hashText(line);
+          const filename = `${hash}.wav`;
+          logs.push(`[${i + 1}/${GAME_LINES.length}] Generating ${filename}`);
+          setLog(logs);
+
+          try {
+            const bytes = await generateLineAudio(apiKey, line, voice);
+            await saveBytes(filename, bytes);
+            success += 1;
+            logs.push(`  OK saved ${filename}`);
+            setLog(logs);
+          } catch (error) {
+            const msg = error && error.message ? error.message : "unknown error";
+            failures.push({ index: i + 1, filename, message: msg });
+            logs.push(`  FAIL ${filename}: ${msg}`);
+            setLog(logs);
+          }
+        }
+
+        if (failures.length === 0) {
+          setStatus(`Status: complete. Saved ${success}/${GAME_LINES.length} files.`, false);
+        } else {
+          setStatus(`Status: finished with errors. Saved ${success}/${GAME_LINES.length}.`, true);
+        }
+      } finally {
+        generateBtn.disabled = false;
+        batchBtn.disabled = false;
+      }
+    }
+
+    generateBtn.addEventListener("click", generateAudio);
+    previewBtn.addEventListener("click", previewAudio);
+    saveBtn.addEventListener("click", saveToProject);
+    downloadBtn.addEventListener("click", downloadWav);
+    batchBtn.addEventListener("click", generateAndSaveAllLines);
+    updateHashView();
+  </script>
+</body>
+</html>

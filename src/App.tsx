@@ -58,8 +58,8 @@ const MISSIONS: Mission[] = [
   {
     id: 1,
     title: "Living or Not?",
-    instruction: "Is it alive?",
-    audioText: "Level One! Scientist, let's look at things that are alive and things that are not alive. Put the living animals with the heart icon. Put the non-living objects with the stone. Living things breathe and grow!",
+    instruction: "Living or Non-Living?",
+    audioText: "Level One! Sort what is living and what is non-living. Living things grow, move, and need air, water, and food. Non-living things do not.",
     leftLabel: "Living",
     leftIcon: <Heart className="text-red-500 fill-red-500" />,
     rightLabel: "Non-Living",
@@ -75,27 +75,27 @@ const MISSIONS: Mission[] = [
   },
   {
     id: 2,
-    title: "Fur or Feathers?",
-    instruction: "What's on their skin?",
-    audioText: "Level Two! Animals belong to different families based on their bodies. Put the animals with soft fur near the bear. Put the animals with feathers near the feather icon. Look closely at their skin!",
-    leftLabel: "Fur",
-    leftIcon: <PawPrint className="text-orange-500" />,
-    rightLabel: "Feathers",
-    rightIcon: <Feather className="text-sky-400" />,
+    title: "Birds: Neck Length",
+    instruction: "Sort by body structure.",
+    audioText: "Level Two! These are all birds. Sort birds with long necks and birds with short necks. Use the names under each picture to help.",
+    leftLabel: "Long Neck",
+    leftIcon: <Feather className="text-sky-400" />,
+    rightLabel: "Short Neck",
+    rightIcon: <PawPrint className="text-orange-500" />,
     items: [
-      { id: 'm2-1', emoji: '🐱', category: 'left', name: 'Cat' },
-      { id: 'm2-2', emoji: '🦉', category: 'right', name: 'Owl' },
-      { id: 'm2-3', emoji: '🐰', category: 'left', name: 'Rabbit' },
-      { id: 'm2-4', emoji: '🦆', category: 'right', name: 'Duck' },
-      { id: 'm2-5', emoji: '🦁', category: 'left', name: 'Lion' },
-      { id: 'm2-6', emoji: '🦢', category: 'right', name: 'Swan' },
+      { id: 'm2-1', emoji: '🦢', category: 'left', name: 'Swan' },
+      { id: 'm2-2', emoji: '🦩', category: 'left', name: 'Flamingo' },
+      { id: 'm2-3', emoji: '🪿', category: 'left', name: 'Goose' },
+      { id: 'm2-4', emoji: '🦉', category: 'right', name: 'Owl' },
+      { id: 'm2-5', emoji: '🦅', category: 'right', name: 'Eagle' },
+      { id: 'm2-6', emoji: '🦜', category: 'right', name: 'Parrot' },
     ]
   },
   {
     id: 3,
     title: "Shells or Scales?",
-    instruction: "Check their armor!",
-    audioText: "Final Level! Some animals have hard shells for a home. Others have bumpy scales. Sort them into the right families. Use your zoologist eyes!",
+    instruction: "Compare body coverings.",
+    audioText: "Final Level! Compare animal body structures. Some animals have hard shells and others have scales. Sort each animal by its structure.",
     leftLabel: "Shell",
     leftIcon: <Shield className="text-green-600" />,
     rightLabel: "Scales",
@@ -110,14 +110,14 @@ const MISSIONS: Mission[] = [
 ];
 
 const FIELD_MISSIONS: FieldMission[] = [
-  { id: 1, task: "Find something that has 4 LEGS.", icon: "🐕", audioText: "Go explore the room! Find an object, a toy, or a picture of an animal with four legs. Draw it below!" },
-  { id: 2, task: "Find something NON-LIVING that is GREEN.", icon: "💚", audioText: "Search the classroom for something green that is not alive. Like a block or a crayon. Draw what you find!" },
-  { id: 3, task: "Find an animal with FEATHERS.", icon: "🪶", audioText: "Look at books or posters. Can you find an animal with feathers? Draw it here!" },
-  { id: 4, task: "Find something LIVING and GROWING.", icon: "🪴", audioText: "Find a living thing that is growing big. Maybe a plant or even a friend! Draw it." },
-  { id: 5, task: "Find an animal with SCALES.", icon: "🐍", audioText: "Look for a picture or toy of an animal with scales. Draw your discovery!" },
-  { id: 6, task: "Find an animal with a SHELL.", icon: "🐢", audioText: "Can you find a turtle or a crab in the classroom? Look for a hard shell and draw it." },
-  { id: 7, task: "Find an animal with soft FUR.", icon: "🧸", audioText: "Find a stuffed animal or a picture of an animal with soft fur. Draw it nicely!" },
-  { id: 8, task: "Find something that makes a NOISE.", icon: "🔔", audioText: "Find a non-living object that makes a loud noise. Draw it here!" },
+  { id: 1, task: "Find 1 NON-LIVING classroom object.", icon: "🪑", audioText: "Find one non-living classroom object, like a chair, book, or pencil. Draw it." },
+  { id: 2, task: "Find 1 LIVING thing (real or in a picture).", icon: "🌱", audioText: "Find one living thing. It can be real or in a classroom picture. Draw it." },
+  { id: 3, task: "Find an animal with FUR (book, poster, or toy).", icon: "🧸", audioText: "Find an animal with fur in a book, poster, or toy. Draw it." },
+  { id: 4, task: "Find an animal with FEATHERS (book or poster).", icon: "🪶", audioText: "Find an animal with feathers in a book or poster. Draw it." },
+  { id: 5, task: "Find an animal with SCALES (book, poster, or toy).", icon: "🐍", audioText: "Find an animal with scales in a book, poster, or toy. Draw it." },
+  { id: 6, task: "Find an animal with a SHELL (book, poster, or toy).", icon: "🐢", audioText: "Find an animal with a shell in a book, poster, or toy. Draw it." },
+  { id: 7, task: "Find an animal that FLIES (book or poster).", icon: "🪽", audioText: "Find an animal that flies in a book or poster. Draw it." },
+  { id: 8, task: "Find 2 BIRDS that look different (book or poster).", icon: "🔍", audioText: "Find two birds that look different in a book or poster. Draw both." },
 ];
 
 // --- Components ---
@@ -516,6 +516,7 @@ export default function App() {
                             key={id} 
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
+                            title={currentMission.items.find(i => i.id === id)?.name}
                             className="text-4xl md:text-5xl w-16 h-16 md:w-20 md:h-20 flex items-center justify-center bg-white rounded-2xl shadow-sm border-2 border-blue-100 shrink-0"
                           >
                             {currentMission.items.find(i => i.id === id)?.emoji}
@@ -539,6 +540,7 @@ export default function App() {
                             key={id}
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
+                            title={currentMission.items.find(i => i.id === id)?.name}
                             className="text-4xl md:text-5xl w-16 h-16 md:w-20 md:h-20 flex items-center justify-center bg-white rounded-2xl shadow-sm border-2 border-orange-100 shrink-0"
                           >
                             {currentMission.items.find(i => i.id === id)?.emoji}
@@ -594,9 +596,13 @@ export default function App() {
                             if (leftZone && x >= leftZone.left && x <= leftZone.right) handleDrop(item.id, 'left');
                             else if (rightZone && x >= rightZone.left && x <= rightZone.right) handleDrop(item.id, 'right');
                           }}
-                          className="text-5xl md:text-6xl w-16 h-16 md:w-24 md:h-24 flex items-center justify-center bg-white rounded-2xl shadow-lg border-2 border-slate-50 cursor-grab shrink-0 touch-none select-none"
+                          title={item.name}
+                          className="w-20 h-24 md:w-24 md:h-28 flex flex-col items-center justify-center gap-1 bg-white rounded-2xl shadow-lg border-2 border-slate-50 cursor-grab shrink-0 touch-none select-none"
                         >
-                          {item.emoji}
+                          <span className="text-4xl md:text-5xl leading-none">{item.emoji}</span>
+                          <span className="text-[10px] md:text-xs font-black text-slate-500 uppercase leading-none tracking-tight">
+                            {item.name}
+                          </span>
                         </motion.div>
                       ))}
                   </div>

@@ -31,6 +31,25 @@ async function startServer() {
     res.json({ exists: false });
   });
 
+  app.post('/api/audio/save', (req, res) => {
+    try {
+      const { filename, dataBase64 } = req.body || {};
+      if (typeof filename !== 'string' || typeof dataBase64 !== 'string') {
+        return res.status(400).json({ error: 'filename and dataBase64 are required strings' });
+      }
+      if (!/^[a-f0-9]{16}\.wav$/i.test(filename)) {
+        return res.status(400).json({ error: 'filename must match <16-char-hash>.wav' });
+      }
+
+      const filePath = path.join(audioDir, filename);
+      fs.writeFileSync(filePath, Buffer.from(dataBase64, 'base64'));
+      return res.json({ ok: true, url: `/audio/${filename}` });
+    } catch (error) {
+      console.error('audio save failed:', error);
+      return res.status(500).json({ error: 'failed to save audio file' });
+    }
+  });
+
   app.use('/audio', express.static(audioDir));
 
   // Vite middleware for development
