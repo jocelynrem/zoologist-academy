@@ -263,7 +263,7 @@ const DrawingCanvas = ({ initialImage, onDraw, onSave }: { initialImage?: string
 };
 
 export default function App() {
-  const [gameState, setGameState] = useState<'start' | 'sorting' | 'field-guide' | 'celebration'>('start');
+  const [gameState, setGameState] = useState<'start' | 'sorting' | 'field-guide' | 'review' | 'celebration'>('start');
   const [currentMissionIdx, setCurrentMissionIdx] = useState(0);
   const [currentFieldIdx, setCurrentFieldIdx] = useState(0);
   const [shuffledFieldMissions, setShuffledFieldMissions] = useState<FieldMission[]>([]);
@@ -350,12 +350,27 @@ export default function App() {
 
   const allSorted = currentMission.items.every(item => sortedItems[item.id]);
 
+  const resetGame = () => {
+    stopAllAudio();
+    setGameState('start');
+    setCurrentMissionIdx(0);
+    setCurrentFieldIdx(0);
+    setShuffledFieldMissions([]);
+    setSortedItems({});
+    setFieldDrawings({});
+    setHasDrawn(false);
+    setShowWrongDropCue(false);
+  };
+
   const skipToFieldGuide = () => {
     stopAllAudio();
     const shuffled = [...FIELD_MISSIONS].sort(() => Math.random() - 0.5);
+    setCurrentMissionIdx(0);
+    setCurrentFieldIdx(0);
     setShuffledFieldMissions(shuffled);
     setSortedItems({});
     setFieldDrawings({});
+    setHasDrawn(false);
     setGameState('field-guide');
   };
 
@@ -378,7 +393,7 @@ export default function App() {
       setCurrentFieldIdx(prev => prev + 1);
       setHasDrawn(false);
     } else {
-      setGameState('celebration');
+      setGameState('review');
     }
   };
 
@@ -392,11 +407,7 @@ export default function App() {
   const unsortedItems = currentMission.items.filter(item => !sortedItems[item.id]);
 
   const backToStart = () => {
-    stopAllAudio();
-    setGameState('start');
-    setCurrentMissionIdx(0);
-    setCurrentFieldIdx(0);
-    setSortedItems({});
+    resetGame();
   };
 
   return (
@@ -409,7 +420,7 @@ export default function App() {
     >
       {/* Global Navigation Overlays */}
       <div className="absolute top-4 right-4 z-50 flex gap-2 no-print">
-        {gameState === 'celebration' && (
+        {(gameState === 'review' || gameState === 'celebration') && (
           <button 
             onClick={backToStart}
             className="bg-white/80 backdrop-blur-sm p-2 rounded-xl shadow-sm border border-slate-200 text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
@@ -701,6 +712,87 @@ export default function App() {
           </motion.div>
         )}
 
+        {gameState === 'review' && (
+          <motion.div
+            key="review"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -40 }}
+            className="flex-grow flex flex-col gap-4 py-6"
+          >
+            <header className="bg-white p-5 md:p-7 rounded-[32px] shadow-lg border-2 border-slate-100 text-center">
+              <div className="text-6xl md:text-7xl mb-3">📔</div>
+              <h1 className="text-3xl md:text-5xl font-black text-slate-800 tracking-tight">Field Guide Review</h1>
+              <p className="mt-2 text-base md:text-xl font-medium text-slate-500">
+                Look back at every mission page before you finish. Teachers can check each drawing here.
+              </p>
+            </header>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {shuffledFieldMissions.map((mission, idx) => {
+                const drawing = fieldDrawings[mission.id];
+
+                return (
+                  <section
+                    key={mission.id}
+                    className="bg-white rounded-[28px] border-2 border-slate-100 shadow-md overflow-hidden"
+                  >
+                    <div className="flex items-start justify-between gap-3 p-4 md:p-5 border-b border-slate-100">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+                          Mission {idx + 1}
+                        </p>
+                        <h2 className="mt-1 text-lg md:text-2xl font-black text-slate-800 leading-tight">
+                          {mission.task}
+                        </h2>
+                      </div>
+                      <div className="text-4xl shrink-0">{mission.icon}</div>
+                    </div>
+
+                    <div className="p-4 md:p-5">
+                      <div className="aspect-[4/3] rounded-[24px] border-4 border-dashed border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center">
+                        {drawing ? (
+                          <img
+                            src={drawing}
+                            alt={`Field guide drawing for ${mission.task}`}
+                            className="w-full h-full object-contain bg-white"
+                          />
+                        ) : (
+                          <p className="px-6 text-center text-sm md:text-base font-bold text-slate-400">
+                            No drawing saved for this page.
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="mt-4 flex gap-3">
+                        <button
+                          onClick={() => {
+                            setCurrentFieldIdx(idx);
+                            setHasDrawn(Boolean(drawing));
+                            setGameState('field-guide');
+                          }}
+                          className="flex-1 bg-blue-500 text-white py-3 rounded-[18px] font-black text-sm md:text-base shadow-lg border-b-4 border-blue-700 active:scale-95 transition-transform"
+                        >
+                          Open Mission
+                        </button>
+                      </div>
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+
+            <div className="flex justify-center">
+              <button
+                onClick={() => setGameState('celebration')}
+                className="btn-primary text-2xl md:text-3xl px-10 py-5 flex items-center gap-3"
+              >
+                FINISH GAME <CheckCircle2 size={32} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         {gameState === 'celebration' && (
           <motion.div 
             key="celebration"
@@ -719,12 +811,7 @@ export default function App() {
               <p className="text-4xl font-medium text-slate-500">You explored the world and filled your guide!</p>
             </div>
             <button 
-              onClick={() => {
-                setCurrentMissionIdx(0);
-                setCurrentFieldIdx(0);
-                setSortedItems({});
-                setGameState('start');
-              }}
+              onClick={resetGame}
               className="btn-primary text-4xl px-16 py-8 flex items-center gap-4 mt-8"
             >
               <RotateCcw size={40} /> PLAY AGAIN
