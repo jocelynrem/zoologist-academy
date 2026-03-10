@@ -8,6 +8,9 @@ const PRECACHE_URLS = [
   `${BASE_PATH}index.html`,
   `${BASE_PATH}manifest.webmanifest`,
   `${BASE_PATH}favicon.svg`,
+  `${BASE_PATH}apple-touch-icon.png`,
+  `${BASE_PATH}icon-192.png`,
+  `${BASE_PATH}icon-512.png`,
 ];
 
 self.addEventListener('install', (event) => {
