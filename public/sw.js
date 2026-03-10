@@ -1,7 +1,7 @@
-const CACHE_VERSION = 'zoologist-academy-v1';
-const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
-const PRECACHE = `${CACHE_VERSION}-precache`;
 const BASE_PATH = self.location.pathname.replace(/\/sw\.js$/, '/');
+const CACHE_PREFIX = `zoologist-academy:${BASE_PATH}`;
+const RUNTIME_CACHE = `${CACHE_PREFIX}runtime`;
+const PRECACHE = `${CACHE_PREFIX}precache`;
 
 const PRECACHE_URLS = [
   BASE_PATH,
@@ -15,17 +15,26 @@ const PRECACHE_URLS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(PRECACHE).then((cache) => cache.addAll(PRECACHE_URLS)).then(() => self.skipWaiting())
+    caches.open(PRECACHE)
+      .then(async (cache) => {
+        const existingRequests = await cache.keys();
+        await Promise.all(existingRequests.map((request) => cache.delete(request)));
+        await cache.addAll(PRECACHE_URLS);
+      })
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(
-      keys
-        .filter((key) => key !== PRECACHE && key !== RUNTIME_CACHE)
-        .map((key) => caches.delete(key))
-    )).then(() => self.clients.claim())
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys
+          .filter((key) => key.startsWith('zoologist-academy:') && key !== PRECACHE && key !== RUNTIME_CACHE)
+          .map((key) => caches.delete(key))
+      ))
+      .then(() => caches.delete(RUNTIME_CACHE))
+      .then(() => self.clients.claim())
   );
 });
 
