@@ -133,23 +133,29 @@ const DrawingCanvas = ({ initialImage, onDraw, onSave }: { initialImage?: string
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const redrawImage = (imageSrc: string, width: number, height: number) => {
+      if (!imageSrc) return;
+
+      const img = new Image();
+      img.onload = () => {
+        ctx.clearRect(0, 0, width, height);
+        // Scale existing drawing to the new canvas size instead of clipping it.
+        ctx.drawImage(img, 0, 0, width, height);
+      };
+      img.src = imageSrc;
+    };
+
     const resize = () => {
       const parent = canvas.parentElement;
       if (parent) {
-        // Save current content before resize if any
         const tempImage = canvas.toDataURL();
-        
+
         canvas.width = parent.offsetWidth;
         canvas.height = parent.offsetHeight;
         ctx.lineCap = 'round';
         ctx.lineWidth = 6;
 
-        // Restore content after resize
-        const img = new Image();
-        img.onload = () => {
-          ctx.drawImage(img, 0, 0);
-        };
-        img.src = tempImage;
+        redrawImage(tempImage, canvas.width, canvas.height);
       }
     };
 
@@ -169,7 +175,7 @@ const DrawingCanvas = ({ initialImage, onDraw, onSave }: { initialImage?: string
       if (initialImage) {
         const img = new Image();
         img.onload = () => {
-          ctx.drawImage(img, 0, 0);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         };
         img.src = initialImage;
       }
@@ -415,7 +421,7 @@ export default function App() {
       className={`app-shell w-full flex flex-col p-3 md:p-6 max-w-6xl mx-auto bg-slate-50 relative ${
         gameState === 'start' || gameState === 'sorting' || gameState === 'field-guide'
           ? 'h-[100dvh] overflow-hidden'
-          : 'min-h-[100dvh] overflow-y-auto'
+          : 'h-[100dvh] overflow-y-auto'
       }`}
     >
       {/* Global Navigation Overlays */}
@@ -782,7 +788,7 @@ export default function App() {
               })}
             </div>
 
-            <div className="flex justify-center">
+            <div className="review-finish-bar sticky bottom-0 z-10 flex justify-center pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-3">
               <button
                 onClick={() => setGameState('celebration')}
                 className="btn-primary text-2xl md:text-3xl px-10 py-5 flex items-center gap-3"

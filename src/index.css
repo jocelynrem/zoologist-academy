@@ -6,6 +6,12 @@
 }
 
 @layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
   body {
     @apply bg-slate-50 text-slate-900 overflow-x-hidden select-none;
     touch-action: manipulation;
@@ -34,6 +40,10 @@
 
 .animate-bounce-gentle {
   animation: bounce-gentle 2s infinite ease-in-out;
+}
+
+.review-finish-bar {
+  background: linear-gradient(to top, rgb(248 250 252), rgb(248 250 252 / 0.96), rgb(248 250 252 / 0));
 }
 
 @media (max-width: 430px) {
