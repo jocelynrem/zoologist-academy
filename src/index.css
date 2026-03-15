@@ -20,7 +20,7 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-3xl font-bold text-2xl shadow-lg active:scale-95 transition-all border-b-4 border-green-700;
+    @apply bg-green-700 hover:bg-green-800 text-white px-8 py-4 rounded-3xl font-bold text-2xl shadow-lg active:scale-95 transition-all border-b-4 border-green-900;
   }
   
   .card-animal {

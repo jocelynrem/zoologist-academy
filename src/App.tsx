@@ -417,8 +417,8 @@ export default function App() {
   };
 
   return (
-    <div
-      className={`app-shell w-full flex flex-col p-3 md:p-6 max-w-6xl mx-auto bg-slate-50 relative ${
+    <main
+      className={`app-shell w-full flex flex-col p-3 md:p-6 max-w-6xl mx-auto bg-slate-50 text-slate-900 relative ${
         gameState === 'start' || gameState === 'sorting' || gameState === 'field-guide'
           ? 'h-[100dvh] overflow-hidden'
           : 'h-[100dvh] overflow-y-auto'
@@ -429,7 +429,7 @@ export default function App() {
         {(gameState === 'review' || gameState === 'celebration') && (
           <button 
             onClick={backToStart}
-            className="bg-white/80 backdrop-blur-sm p-2 rounded-xl shadow-sm border border-slate-200 text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
+            className="bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-sm border border-slate-200 text-slate-700 hover:text-slate-900 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
             title="Back to Start"
           >
             <RotateCcw size={16} />
@@ -465,7 +465,7 @@ export default function App() {
               
               <button 
                 onClick={skipToFieldGuide}
-                className="text-slate-400 font-bold hover:text-slate-600 transition-colors flex items-center justify-center gap-2 text-lg md:text-xl"
+                className="text-slate-700 font-bold hover:text-slate-900 transition-colors flex items-center justify-center gap-2 text-lg md:text-xl"
               >
                 <BookOpen size={24} /> Skip to Field Guide
               </button>
@@ -825,6 +825,6 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </main>
   );
 }
