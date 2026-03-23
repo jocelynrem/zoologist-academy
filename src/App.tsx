@@ -53,6 +53,9 @@ interface FieldMission {
   audioText: string;
 }
 
+const FIELD_DRAWINGS_STORAGE_KEY = 'zoologistAcademy.fieldDrawings';
+const FIELD_MISSION_ORDER_STORAGE_KEY = 'zoologistAcademy.fieldMissionOrder';
+
 // --- Constants ---
 const MISSIONS: Mission[] = [
   {
@@ -291,6 +294,51 @@ export default function App() {
 
   const currentMission = MISSIONS[currentMissionIdx];
   const currentFieldMission = shuffledFieldMissions[currentFieldIdx];
+  const hasSavedFieldGuide = Object.values(fieldDrawings).some(Boolean);
+
+  useEffect(() => {
+    try {
+      const savedDrawings = window.localStorage.getItem(FIELD_DRAWINGS_STORAGE_KEY);
+      if (savedDrawings) {
+        setFieldDrawings(JSON.parse(savedDrawings));
+      }
+
+      const savedMissionOrder = window.localStorage.getItem(FIELD_MISSION_ORDER_STORAGE_KEY);
+      if (savedMissionOrder) {
+        const missionIds: number[] = JSON.parse(savedMissionOrder);
+        const restoredMissions = missionIds
+          .map(id => FIELD_MISSIONS.find(mission => mission.id === id))
+          .filter((mission): mission is FieldMission => Boolean(mission));
+
+        if (restoredMissions.length) {
+          setShuffledFieldMissions(restoredMissions);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to restore saved field guide.', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(FIELD_DRAWINGS_STORAGE_KEY, JSON.stringify(fieldDrawings));
+    } catch (error) {
+      console.error('Failed to save field guide drawings.', error);
+    }
+  }, [fieldDrawings]);
+
+  useEffect(() => {
+    if (!shuffledFieldMissions.length) return;
+
+    try {
+      window.localStorage.setItem(
+        FIELD_MISSION_ORDER_STORAGE_KEY,
+        JSON.stringify(shuffledFieldMissions.map(mission => mission.id))
+      );
+    } catch (error) {
+      console.error('Failed to save field guide mission order.', error);
+    }
+  }, [shuffledFieldMissions]);
 
   const stopAllAudio = () => {
     if (audioRef.current) {
@@ -369,22 +417,21 @@ export default function App() {
     setGameState('start');
     setCurrentMissionIdx(0);
     setCurrentFieldIdx(0);
-    setShuffledFieldMissions([]);
     setSortedItems({});
-    setFieldDrawings({});
     setHasDrawn(false);
     setShowWrongDropCue(false);
   };
 
   const skipToFieldGuide = () => {
     stopAllAudio();
-    const shuffled = [...FIELD_MISSIONS].sort(() => Math.random() - 0.5);
+    const shuffled = shuffledFieldMissions.length
+      ? shuffledFieldMissions
+      : [...FIELD_MISSIONS].sort(() => Math.random() - 0.5);
     setCurrentMissionIdx(0);
     setCurrentFieldIdx(0);
     setShuffledFieldMissions(shuffled);
     setSortedItems({});
-    setFieldDrawings({});
-    setHasDrawn(false);
+    setHasDrawn(Boolean(fieldDrawings[shuffled[0]?.id]));
     setGameState('field-guide');
   };
 
@@ -424,6 +471,19 @@ export default function App() {
     resetGame();
   };
 
+  const clearFieldGuide = () => {
+    setFieldDrawings({});
+    setShuffledFieldMissions([]);
+    setCurrentFieldIdx(0);
+    setHasDrawn(false);
+    try {
+      window.localStorage.removeItem(FIELD_DRAWINGS_STORAGE_KEY);
+      window.localStorage.removeItem(FIELD_MISSION_ORDER_STORAGE_KEY);
+    } catch (error) {
+      console.error('Failed to clear saved field guide.', error);
+    }
+  };
+
   return (
     <main
       className={`app-shell w-full flex flex-col p-3 md:p-6 max-w-6xl mx-auto bg-slate-50 text-slate-900 relative ${
@@ -434,6 +494,16 @@ export default function App() {
     >
       {/* Global Navigation Overlays */}
       <div className="absolute top-4 right-4 z-50 flex gap-2 no-print">
+        {hasSavedFieldGuide && (
+          <button
+            onClick={clearFieldGuide}
+            className="bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-sm border border-slate-200 text-red-500 hover:text-red-700 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
+            title="Clear Saved Field Guide"
+          >
+            <Eraser size={16} />
+            <span>Clear Guide</span>
+          </button>
+        )}
         {(gameState === 'review' || gameState === 'celebration') && (
           <button 
             onClick={backToStart}
