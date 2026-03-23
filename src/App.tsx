@@ -286,11 +286,13 @@ export default function App() {
   const [shuffledFieldMissions, setShuffledFieldMissions] = useState<FieldMission[]>([]);
   const [sortedItems, setSortedItems] = useState<{ [key: string]: Category }>({});
   const [fieldDrawings, setFieldDrawings] = useState<{ [missionId: number]: string }>({});
+  const [fieldGuideReturnState, setFieldGuideReturnState] = useState<'review' | 'celebration' | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
   const [showWrongDropCue, setShowWrongDropCue] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const wrongDropTimerRef = useRef<number | null>(null);
+  const celebrationAudioContextRef = useRef<AudioContext | null>(null);
   const hasRestoredFieldGuideRef = useRef(false);
 
   const currentMission = MISSIONS[currentMissionIdx];
@@ -351,7 +353,52 @@ export default function App() {
       audioRef.current.currentTime = 0;
       audioRef.current.onended = null;
     }
+    if (celebrationAudioContextRef.current) {
+      celebrationAudioContextRef.current.close().catch(() => undefined);
+      celebrationAudioContextRef.current = null;
+    }
     setIsSpeaking(false);
+  };
+
+  const playCelebrationSound = () => {
+    try {
+      const AudioContextCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextCtor) return;
+
+      celebrationAudioContextRef.current?.close().catch(() => undefined);
+
+      const context = new AudioContextCtor();
+      celebrationAudioContextRef.current = context;
+      const gain = context.createGain();
+      gain.connect(context.destination);
+
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((frequency, index) => {
+        const osc = context.createOscillator();
+        const noteStart = context.currentTime + index * 0.16;
+        const noteEnd = noteStart + 0.2;
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(frequency, noteStart);
+        osc.connect(gain);
+
+        gain.gain.setValueAtTime(0.0001, noteStart);
+        gain.gain.exponentialRampToValueAtTime(0.22, noteStart + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, noteEnd);
+
+        osc.start(noteStart);
+        osc.stop(noteEnd);
+      });
+
+      window.setTimeout(() => {
+        context.close().catch(() => undefined);
+        if (celebrationAudioContextRef.current === context) {
+          celebrationAudioContextRef.current = null;
+        }
+      }, 1200);
+    } catch (error) {
+      console.error('Celebration sound failed.', error);
+    }
   };
 
   const handleSpeak = async (text: string) => {
@@ -423,6 +470,7 @@ export default function App() {
     setCurrentMissionIdx(0);
     setCurrentFieldIdx(0);
     setSortedItems({});
+    setFieldGuideReturnState(null);
     setHasDrawn(false);
     setShowWrongDropCue(false);
   };
@@ -436,6 +484,7 @@ export default function App() {
     setCurrentFieldIdx(0);
     setShuffledFieldMissions(shuffled);
     setSortedItems({});
+    setFieldGuideReturnState(null);
     setHasDrawn(Boolean(fieldDrawings[shuffled[0]?.id]));
     setGameState('field-guide');
   };
@@ -453,6 +502,10 @@ export default function App() {
     const currentDrawing = fieldDrawings[currentFieldMission.id];
     if (!currentDrawing && !hasDrawn) {
       handleSpeak("Scientist! Don't forget to draw what you found in your field guide!");
+      return;
+    }
+    if (fieldGuideReturnState) {
+      setGameState(fieldGuideReturnState);
       return;
     }
     if (currentFieldIdx < shuffledFieldMissions.length - 1) {
@@ -473,10 +526,16 @@ export default function App() {
   const unsortedItems = currentMission.items.filter(item => !sortedItems[item.id]);
 
   const clearFieldGuide = () => {
+    stopAllAudio();
+    setGameState('start');
+    setCurrentMissionIdx(0);
     setFieldDrawings({});
     setShuffledFieldMissions([]);
     setCurrentFieldIdx(0);
+    setSortedItems({});
+    setFieldGuideReturnState(null);
     setHasDrawn(false);
+    setShowWrongDropCue(false);
     try {
       window.localStorage.removeItem(FIELD_DRAWINGS_STORAGE_KEY);
       window.localStorage.removeItem(FIELD_MISSION_ORDER_STORAGE_KEY);
@@ -484,6 +543,12 @@ export default function App() {
       console.error('Failed to clear saved field guide.', error);
     }
   };
+
+  useEffect(() => {
+    if (gameState === 'celebration') {
+      playCelebrationSound();
+    }
+  }, [gameState]);
 
   return (
     <main
@@ -493,20 +558,6 @@ export default function App() {
           : 'h-[100dvh] overflow-y-auto'
       }`}
     >
-      {/* Global Navigation Overlays */}
-      <div className="absolute top-4 right-4 z-50 flex gap-2 no-print">
-        {hasSavedFieldGuide && (
-          <button
-            onClick={clearFieldGuide}
-            className="bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-sm border border-slate-200 text-red-500 hover:text-red-700 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
-            title="Clear Saved Field Guide"
-          >
-            <Eraser size={16} />
-            <span>Clear Guide</span>
-          </button>
-        )}
-      </div>
-
       <AnimatePresence mode="wait">
         {gameState === 'start' && (
           <motion.div 
@@ -747,34 +798,53 @@ export default function App() {
               </div>
 
               <footer className="field-guide-footer flex gap-2 md:gap-3 shrink-0">
-                <button 
-                  onClick={prevFieldMission}
-                  className={`bg-slate-100 text-slate-500 px-4 md:px-7 rounded-[18px] md:rounded-[25px] font-black text-lg md:text-2xl shadow active:scale-95 transition-transform ${currentFieldIdx === 0 ? 'opacity-30 pointer-events-none' : ''}`}
-                >
-                  ◀
-                </button>
-                <button 
-                  onClick={nextFieldMission}
-                  className={`flex-grow bg-green-500 text-white py-2.5 md:py-4 rounded-[18px] md:rounded-[25px] font-black text-sm md:text-xl shadow-xl active:scale-95 transition-transform border-b-6 border-green-700 ${(!hasDrawn && !fieldDrawings[currentFieldMission.id]) ? 'opacity-50 grayscale' : ''}`}
-                >
-                  I FOUND IT! ➔
-                </button>
-                <button 
-                  onClick={() => {
-                    const currentDrawing = fieldDrawings[currentFieldMission.id];
-                    if (!currentDrawing && !hasDrawn) {
-                      handleSpeak("Scientist! Don't forget to draw what you found in your field guide!");
-                      return;
-                    }
-                    if (currentFieldIdx < shuffledFieldMissions.length - 1) {
-                      setCurrentFieldIdx(prev => prev + 1);
-                      setHasDrawn(false);
-                    }
-                  }}
-                  className={`bg-slate-100 text-slate-500 px-4 md:px-7 rounded-[18px] md:rounded-[25px] font-black text-lg md:text-2xl shadow active:scale-95 transition-transform ${currentFieldIdx === shuffledFieldMissions.length - 1 ? 'opacity-30 pointer-events-none' : ''}`}
-                >
-                  ▶
-                </button>
+                {fieldGuideReturnState ? (
+                  <>
+                    <button
+                      onClick={() => setGameState(fieldGuideReturnState)}
+                      className="bg-slate-100 text-slate-600 px-4 md:px-7 rounded-[18px] md:rounded-[25px] font-black text-sm md:text-lg shadow active:scale-95 transition-transform"
+                    >
+                      BACK TO GUIDE
+                    </button>
+                    <button 
+                      onClick={nextFieldMission}
+                      className={`flex-grow bg-green-500 text-white py-2.5 md:py-4 rounded-[18px] md:rounded-[25px] font-black text-sm md:text-xl shadow-xl active:scale-95 transition-transform border-b-6 border-green-700 ${(!hasDrawn && !fieldDrawings[currentFieldMission.id]) ? 'opacity-50 grayscale' : ''}`}
+                    >
+                      SAVE & RETURN
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button 
+                      onClick={prevFieldMission}
+                      className={`bg-slate-100 text-slate-500 px-4 md:px-7 rounded-[18px] md:rounded-[25px] font-black text-lg md:text-2xl shadow active:scale-95 transition-transform ${currentFieldIdx === 0 ? 'opacity-30 pointer-events-none' : ''}`}
+                    >
+                      ◀
+                    </button>
+                    <button 
+                      onClick={nextFieldMission}
+                      className={`flex-grow bg-green-500 text-white py-2.5 md:py-4 rounded-[18px] md:rounded-[25px] font-black text-sm md:text-xl shadow-xl active:scale-95 transition-transform border-b-6 border-green-700 ${(!hasDrawn && !fieldDrawings[currentFieldMission.id]) ? 'opacity-50 grayscale' : ''}`}
+                    >
+                      I FOUND IT! ➔
+                    </button>
+                    <button 
+                      onClick={() => {
+                        const currentDrawing = fieldDrawings[currentFieldMission.id];
+                        if (!currentDrawing && !hasDrawn) {
+                          handleSpeak("Scientist! Don't forget to draw what you found in your field guide!");
+                          return;
+                        }
+                        if (currentFieldIdx < shuffledFieldMissions.length - 1) {
+                          setCurrentFieldIdx(prev => prev + 1);
+                          setHasDrawn(false);
+                        }
+                      }}
+                      className={`bg-slate-100 text-slate-500 px-4 md:px-7 rounded-[18px] md:rounded-[25px] font-black text-lg md:text-2xl shadow active:scale-95 transition-transform ${currentFieldIdx === shuffledFieldMissions.length - 1 ? 'opacity-30 pointer-events-none' : ''}`}
+                    >
+                      ▶
+                    </button>
+                  </>
+                )}
               </footer>
             </div>
           </motion.div>
@@ -837,6 +907,7 @@ export default function App() {
                           onClick={() => {
                             setCurrentFieldIdx(idx);
                             setHasDrawn(Boolean(drawing));
+                            setFieldGuideReturnState('review');
                             setGameState('field-guide');
                           }}
                           className="flex-1 bg-blue-500 text-white py-3 rounded-[18px] font-black text-sm md:text-base shadow-lg border-b-4 border-blue-700 active:scale-95 transition-transform"
@@ -852,7 +923,10 @@ export default function App() {
 
             <div className="review-finish-bar sticky bottom-0 z-10 flex justify-center pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-3">
               <button
-                onClick={() => setGameState('celebration')}
+                onClick={() => {
+                  setFieldGuideReturnState('celebration');
+                  setGameState('celebration');
+                }}
                 className="btn-primary text-2xl md:text-3xl px-10 py-5 flex items-center gap-3"
               >
                 FINISH GAME <CheckCircle2 size={32} />
@@ -878,12 +952,22 @@ export default function App() {
               <h1 className="text-8xl font-black text-slate-800 tracking-tight">Master Zoologist!</h1>
               <p className="text-4xl font-medium text-slate-500">You explored the world and filled your guide!</p>
             </div>
-            <button 
-              onClick={resetGame}
-              className="btn-primary text-4xl px-16 py-8 flex items-center gap-4 mt-8"
-            >
-              <RotateCcw size={40} /> PLAY AGAIN
-            </button>
+            <div className="flex flex-col items-center gap-3 mt-4">
+              <button
+                onClick={() => setGameState('review')}
+                className="bg-white text-slate-700 px-10 py-4 rounded-[24px] font-black text-xl shadow-lg border-b-4 border-slate-300 active:scale-95 transition-transform"
+              >
+                REVIEW FIELD GUIDE
+              </button>
+              {hasSavedFieldGuide && (
+                <button
+                  onClick={clearFieldGuide}
+                  className="text-sm md:text-base font-black uppercase tracking-wide text-red-500 hover:text-red-700 transition-colors flex items-center gap-2"
+                >
+                  <Eraser size={16} /> Clear Guide And Start Again
+                </button>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
