@@ -87,10 +87,10 @@ const MISSIONS: Mission[] = [
     rightIcon: <PawPrint className="text-orange-500" />,
     items: [
       { id: 'm2-1', emoji: '🦢', category: 'left', name: 'Swan' },
-      { id: 'm2-2', emoji: '🦩', category: 'left', name: 'Flamingo' },
-      { id: 'm2-3', emoji: '🪿', category: 'left', name: 'Goose' },
       { id: 'm2-4', emoji: '🦉', category: 'right', name: 'Owl' },
+      { id: 'm2-2', emoji: '🦩', category: 'left', name: 'Flamingo' },
       { id: 'm2-5', emoji: '🦅', category: 'right', name: 'Eagle' },
+      { id: 'm2-3', emoji: '🦢', category: 'left', name: 'Ostrich' },
       { id: 'm2-6', emoji: '🦜', category: 'right', name: 'Parrot' },
     ]
   },
