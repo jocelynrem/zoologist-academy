@@ -291,6 +291,7 @@ export default function App() {
   const [showWrongDropCue, setShowWrongDropCue] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const wrongDropTimerRef = useRef<number | null>(null);
+  const hasRestoredFieldGuideRef = useRef(false);
 
   const currentMission = MISSIONS[currentMissionIdx];
   const currentFieldMission = shuffledFieldMissions[currentFieldIdx];
@@ -316,10 +317,14 @@ export default function App() {
       }
     } catch (error) {
       console.error('Failed to restore saved field guide.', error);
+    } finally {
+      hasRestoredFieldGuideRef.current = true;
     }
   }, []);
 
   useEffect(() => {
+    if (!hasRestoredFieldGuideRef.current) return;
+
     try {
       window.localStorage.setItem(FIELD_DRAWINGS_STORAGE_KEY, JSON.stringify(fieldDrawings));
     } catch (error) {
@@ -328,7 +333,7 @@ export default function App() {
   }, [fieldDrawings]);
 
   useEffect(() => {
-    if (!shuffledFieldMissions.length) return;
+    if (!hasRestoredFieldGuideRef.current || !shuffledFieldMissions.length) return;
 
     try {
       window.localStorage.setItem(
@@ -467,10 +472,6 @@ export default function App() {
 
   const unsortedItems = currentMission.items.filter(item => !sortedItems[item.id]);
 
-  const backToStart = () => {
-    resetGame();
-  };
-
   const clearFieldGuide = () => {
     setFieldDrawings({});
     setShuffledFieldMissions([]);
@@ -502,16 +503,6 @@ export default function App() {
           >
             <Eraser size={16} />
             <span>Clear Guide</span>
-          </button>
-        )}
-        {(gameState === 'review' || gameState === 'celebration') && (
-          <button 
-            onClick={backToStart}
-            className="bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-sm border border-slate-200 text-slate-700 hover:text-slate-900 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-tighter"
-            title="Back to Start"
-          >
-            <RotateCcw size={16} />
-            <span>Start</span>
           </button>
         )}
       </div>
@@ -735,14 +726,6 @@ export default function App() {
                   <p className="field-guide-task text-sm md:text-lg font-bold text-blue-600 leading-tight">{currentFieldMission.task}</p>
                 </div>
                 <div className="flex items-center gap-2 md:gap-3">
-                  <button
-                    onClick={backToStart}
-                    className="bg-white p-2.5 md:p-3 rounded-full shadow-sm border border-slate-200 text-slate-400 hover:text-slate-600 transition-colors active:scale-95"
-                    title="Back to Start"
-                    aria-label="Back to Start"
-                  >
-                    <RotateCcw size={18} />
-                  </button>
                   <button 
                     onClick={() => handleSpeak(currentFieldMission.audioText)}
                     className={`field-guide-audio p-3 md:p-5 min-w-12 min-h-12 md:min-w-16 md:min-h-16 rounded-full shadow-lg border-2 border-white transition-all ${isSpeaking ? 'bg-red-500 text-white animate-pulse scale-105' : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105'}`}
