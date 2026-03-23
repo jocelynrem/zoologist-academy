@@ -124,8 +124,13 @@ const FIELD_MISSIONS: FieldMission[] = [
 
 const DrawingCanvas = ({ initialImage, onDraw, onSave }: { initialImage?: string, onDraw: () => void, onSave: (data: string) => void }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const savedImageRef = useRef(initialImage ?? '');
   const [isDrawing, setIsDrawing] = useState(false);
   const [color, setColor] = useState('#000000');
+
+  useEffect(() => {
+    savedImageRef.current = initialImage ?? '';
+  }, [initialImage]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -148,7 +153,7 @@ const DrawingCanvas = ({ initialImage, onDraw, onSave }: { initialImage?: string
     const resize = () => {
       const parent = canvas.parentElement;
       if (parent) {
-        const tempImage = canvas.toDataURL();
+        const tempImage = savedImageRef.current || canvas.toDataURL();
 
         canvas.width = parent.offsetWidth;
         canvas.height = parent.offsetHeight;
@@ -192,7 +197,9 @@ const DrawingCanvas = ({ initialImage, onDraw, onSave }: { initialImage?: string
       onDraw();
       const canvas = canvasRef.current;
       if (canvas) {
-        onSave(canvas.toDataURL());
+        const drawingData = canvas.toDataURL();
+        savedImageRef.current = drawingData;
+        onSave(drawingData);
       }
     }
     setIsDrawing(false);
@@ -227,6 +234,7 @@ const DrawingCanvas = ({ initialImage, onDraw, onSave }: { initialImage?: string
     const ctx = canvas?.getContext('2d');
     if (canvas && ctx) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      savedImageRef.current = '';
       onSave('');
     }
   };
@@ -678,6 +686,7 @@ export default function App() {
 
               <div className="drawing-stage flex-1 min-h-0">
                 <DrawingCanvas 
+                  key={currentFieldMission.id}
                   initialImage={fieldDrawings[currentFieldMission.id]}
                   onDraw={() => setHasDrawn(true)} 
                   onSave={(data) => setFieldDrawings(prev => ({ ...prev, [currentFieldMission.id]: data }))}
