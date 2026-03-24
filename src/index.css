@@ -42,8 +42,14 @@
   animation: bounce-gentle 2s infinite ease-in-out;
 }
 
-.review-finish-bar {
-  background: linear-gradient(to top, rgb(248 250 252), rgb(248 250 252 / 0.96), rgb(248 250 252 / 0));
+.field-guide-badge {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.field-guide-badge-accent {
+  width: 1.35rem;
+  height: 1.35rem;
 }
 
 @media (max-width: 430px) {
@@ -66,9 +72,24 @@
     line-height: 1.1;
   }
 
+  .field-guide-subtle {
+    font-size: 0.7rem;
+    line-height: 1.1;
+  }
+
   .field-guide-task {
     font-size: 0.92rem;
     line-height: 1.2;
+  }
+
+  .field-guide-badge {
+    width: 3.15rem;
+    height: 3.15rem;
+  }
+
+  .field-guide-badge-accent {
+    width: 1.05rem;
+    height: 1.05rem;
   }
 
   .drawing-palette {
@@ -91,9 +112,14 @@
     padding: 0.35rem;
   }
 
-  .field-guide-icon-emoji {
-    font-size: 2rem;
-    line-height: 1;
+  .field-guide-badge {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .field-guide-badge-accent {
+    width: 0.95rem;
+    height: 0.95rem;
   }
 
   .field-guide-meta {
@@ -108,6 +134,10 @@
   .field-guide-task {
     font-size: 0.85rem;
     line-height: 1.1;
+  }
+
+  .field-guide-subtle {
+    display: none;
   }
 
   .field-guide-audio {
