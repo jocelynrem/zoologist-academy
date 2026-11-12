@@ -971,10 +971,24 @@ export default function App() {
       </AnimatePresence>
       <footer className="mt-auto shrink-0 text-right text-sm">
         <a
-          className="inline-block px-2 py-1 text-slate-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="inline-flex items-center gap-1 px-2 py-1 text-slate-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2"
           href="https://jocelynrem.com/"
         >
-          <span aria-hidden="true">↶</span> jocelynrem.com
+          jocelynrem.com
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M9 14 4 9l5-5M4 9h10a5 5 0 0 1 0 10h-3" />
+          </svg>
         </a>
       </footer>
     </main>
