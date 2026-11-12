@@ -969,6 +969,14 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
+      <footer className="mt-auto shrink-0 text-center text-sm">
+        <a
+          className="inline-block px-2 py-1 text-slate-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+          href="https://jocelynrem.com/"
+        >
+          Back to Jocelyn Remington’s portfolio
+        </a>
+      </footer>
     </main>
   );
 }
